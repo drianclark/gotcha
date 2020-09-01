@@ -1,0 +1,20 @@
+{
+  "name": "gotcha",
+  "version": "0.0.1",
+  "description": "psych but in the browser",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js"
+  },
+  "author": "Adrian David",
+  "license": "MIT",
+  "dependencies": {
+    "bootstrap-css-only": "^4.4.1",
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "node-sass": "^4.14.1",
+    "nodemon": "^2.0.4"
+  }
+}

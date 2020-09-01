@@ -1,0 +1,7 @@
+.lobby {
+    display: none;
+
+    & > .startGameButton {
+        display: none;
+    }
+}

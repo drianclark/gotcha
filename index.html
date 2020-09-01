@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport">
+    <title>Gotcha!</title>
+</head>
+<script src="/socket.io/socket.io.js"></script>
+<link rel="stylesheet" href="static/style.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<body>
+    <div class="container mt-5">
+
+        <div class="row" id="usernameForm">
+            <div class="col-3">
+                <input type="text" class="form-control" id="usernameField" placeholder="Enter your username">
+            </div>
+            <div class="col-3">
+                <button type="button" onclick="onUsernameSubmit()" id="usernameSubmit" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+
+        <div class="lobby" id="lobby">
+            <h2>Players</h2>
+            <ul id="lobbyPlayersList" class="lobbyPlayersList list-group list-group-flush"></ul>
+            <button onclick="startGame()" id="startGameButton" class="mt-5 btn btn-outline-success startGameButton">Start Game!</button>
+        </div>
+
+        <div class="categoryMenu" id="categoryMenu">
+
+        </div>
+    </div>
+</body>
+
+<script src="/static/game.js"></script>
+</html>
