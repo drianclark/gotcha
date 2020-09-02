@@ -7,6 +7,7 @@
 </head>
 <script src="/socket.io/socket.io.js"></script>
 <link rel="stylesheet" href="static/style.css">
+<link rel="stylesheet" href="static/fontawesome-free-5.14.0-web/css/all.min.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 <body>
     <div class="container mt-5">
@@ -31,14 +32,20 @@
             <div class="question" id="question">
             </div>
             
-            <div class="form-group madeUpChoiceForm" id="madeUpChoiceForm">
+            <div class="madeUpChoiceForm" id="madeUpChoiceForm">
                 <textarea class="form-control" id="userGivenChoice" rows="3"></textarea>
                 <button type="button" id="submitGivenChoice" class="btn btn-primary mt-2">Submit</button>
+                <!-- <i class="fas fa-circle-notch fa-spin givenChoiceSpinner" id="givenChoiceSpinner"></i> -->
             </div>
 
             <div class="container choices" id="choices">
 
             </div>
+        
+        </div>
+
+        <div class="logs" id="logs">
+            <textarea id="logsBox" rows="6"></textarea>
         </div>
 
         
@@ -47,5 +54,5 @@
     </div>
 </body>
 
-<script src="/static/game.js"></script>
+<script src="/static/client.js"></script>
 </html>

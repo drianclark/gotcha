@@ -3,6 +3,7 @@ const fetch = require('node-fetch');
 const http = require('http');
 const path = require('path');
 const socketIO = require('socket.io');
+const { start } = require('repl');
 
 const app = express();
 const server = http.Server(app);
@@ -43,12 +44,22 @@ io.on('connection', function(socket) {
 
     // JOIN
     socket.on('join', username => {
-        console.log(username + ' has joined!');
+        // check if username doesn't exist yet
+
+        if (username in players) {
+            console.log('error joining');
+            io.to(socket.id).emit('joinFail', 'Username already exists');
+            return;
+        }
+
+        io.to(socket.id).emit('joinSuccess');
 
         players[username] = {
             score: 0,
             socketID: socket.id
         }
+
+        console.log(username + ' has joined!');
 
         adminQueue.push(socket.id);
         
@@ -127,18 +138,18 @@ io.on('connection', function(socket) {
         }
     })
 
-    socket.on('answerSubmitted', (username, answer) => {
-        playerAnswers[username] = answer;
+    socket.on('answerSubmitted', (username, userAnswer) => {
+        playerAnswers[username] = userAnswer;
 
         removeFromWaitingFor(username);
-        console.log(username + ' answered ' + answer);
+        console.log(username + ' answered ' + userAnswer);
 
         if (waitingFor.length == 0) {
-            console.log('The correct answer is: ' + answer);
+            console.log('The correct answer is: ' + userAnswer);
             console.log(playerAnswers);
 
-            for (const [player, answer] of Object.entries(playerAnswers)) {
-                if (answer == answer) {
+            for (const [player, userAnswer] of Object.entries(playerAnswers)) {
+                if (userAnswer == answer) {
                     console.log(player + ' gains a point');
 
                     try {
@@ -147,17 +158,27 @@ io.on('connection', function(socket) {
                         console.log(e);
                     }
                 }
+
+                console.log(players);
             }
 
             // filling waitingFor again
             waitingFor = Object.keys(players);
 
-            // emit 'roundEnd', wait for 'roundCleanUpDone' from clients
-            
-            startNewRound();
+            // on roundEnd, clients clean up 
+            io.sockets.emit('roundEnd');
+            // after clients clean up, they emit cleanupDone
         }
 
     });
+
+    socket.on('cleanupDone', (username) => {
+        removeFromWaitingFor(username);
+
+        if (waitingFor.length == 0) {
+            startNewRound();
+        }
+    })
 
 });
 
@@ -202,8 +223,6 @@ async function startNewRound() {
     playerGivenChoices = [];
 
     waitingFor = Object.keys(players);
-
-    console.log(questionObject);
 
     io.sockets.emit('updateQuestion', question);
 }

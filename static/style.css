@@ -1,10 +1,17 @@
 .lobby {
   display: none; }
-  .lobby > .startGameButton {
-    display: none; }
+
+.lobby > .startGameButton {
+  display: none; }
 
 .questionContainer {
   display: none; }
 
 .choices {
+  display: none; }
+
+.givenChoiceSpinner {
+  display: none; }
+
+.logs {
   display: none; }
