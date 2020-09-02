@@ -16,7 +16,7 @@ const triviaCategories = {
 }
 
 const PORT = process.env.PORT || 5000;
-app.set('port', process.env.PORT);
+app.set('port', PORT);
 app.use('/static', express.static(__dirname + '/static'));
 
 // Routing
