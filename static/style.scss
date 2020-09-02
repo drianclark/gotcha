@@ -20,4 +20,8 @@
 
 .logs {
     display: none;
+
+    > .logsBox {
+        width: 100%;
+    } 
 }

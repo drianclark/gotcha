@@ -42,7 +42,7 @@ var playerAnswers = {};
 // Add the WebSocket handlers
 io.on('connection', function(socket) {
 
-    // JOIN
+    // on join
     socket.on('join', username => {
         // check if username doesn't exist yet
 
@@ -60,6 +60,7 @@ io.on('connection', function(socket) {
         }
 
         console.log(username + ' has joined!');
+        logForAll(username + ' has joined!');
 
         adminQueue.push(socket.id);
         
@@ -73,7 +74,7 @@ io.on('connection', function(socket) {
         console.log(players);
     });
 
-    // QUIT
+    // on quit
     socket.on('disconnect', () => {
         let userQuit;
 
@@ -102,12 +103,18 @@ io.on('connection', function(socket) {
         updatePlayers();
     })
 
-    // START GAME
+    // start round
     socket.on('startRound', async () => {
         startNewRound();
+
+        logForAll('--------------------------------------------');
+        logForAll('Round start');
+        logForAll('');
+
         // when the players finish answering, they emit questionChoiceSubmitted
     });
 
+    // after a fake answer choice has been submitted
     socket.on('questionChoiceSubmitted', (username, choice) => {
         playerGivenChoices[username] = choice;
 
@@ -138,6 +145,7 @@ io.on('connection', function(socket) {
         }
     })
 
+    // after an answer has been submitted
     socket.on('answerSubmitted', (username, userAnswer) => {
         playerAnswers[username] = userAnswer;
 
@@ -172,6 +180,7 @@ io.on('connection', function(socket) {
 
     });
 
+    // after clients are done cleaning up
     socket.on('cleanupDone', (username) => {
         removeFromWaitingFor(username);
 
@@ -249,4 +258,8 @@ function shuffle(a) {
         a[j] = x;
     }
     return a;
+}
+ 
+function logForAll(message) {
+    io.sockets.emit('log', message);
 }

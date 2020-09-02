@@ -3,6 +3,7 @@ var username;
 
 var lobbyContainer = document.getElementById('lobby');
 var lobbyPlayersList = document.getElementById('lobbyPlayersList');
+var usernameForm =document.getElementById('usernameForm');
 var usernameField = document.getElementById('usernameField');
 var usernameSubmit = document.getElementById('usernameSubmit')
 var startGameButton = document.getElementById('startGameButton');
@@ -12,6 +13,10 @@ var madeUpChoiceForm = document.getElementById("madeUpChoiceForm");
 var userGivenChoiceField = document.getElementById("userGivenChoice");
 var submitGivenChoiceButton = document.getElementById("submitGivenChoice");
 var choicesContainer = document.getElementById("choices");
+var logs = document.getElementById("logs");
+var logsBox = document.getElementById("logsBox");
+
+
 // var givenChoiceSpinner = document.getElementById("givenChoiceSpinner");
 
 usernameSubmit.addEventListener("click", () => {
@@ -49,8 +54,9 @@ socket.on('joinFail', (errorMessage) => {
 
 socket.on('joinSuccess', () => {
     console.log('join success!');
-    document.getElementById('usernameForm').style.display = "none";
-    document.getElementById('lobby').style.display = "block";
+    usernameForm.style.display = "none";
+    lobbyContainer.style.display = "block";
+    logs.style.display = "block";
 });
 
 socket.on('playersList', (players) => {
@@ -130,3 +136,11 @@ socket.on('roundEnd', () => {
     // signal cleanup done
     socket.emit('cleanupDone', username);
 })
+
+socket.on('log', (message) => {
+    log(message);
+})
+
+function log(message) {
+    logsBox.value += message + '\r\n';
+}
