@@ -15,7 +15,8 @@ const triviaCategories = {
     'celebrities':'https://opentdb.com/api.php?amount=1&category=26&type=multiple&encode=base64'
 }
 
-app.set('port', 5000);
+const PORT = process.env.PORT || 5000;
+app.set('port', process.env.PORT);
 app.use('/static', express.static(__dirname + '/static'));
 
 // Routing
