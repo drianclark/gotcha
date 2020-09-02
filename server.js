@@ -25,8 +25,8 @@ app.get('/', function(request, response) {
 });
 
 // Starts the server.
-server.listen(5000, function() {
-    console.log('Starting server on port 5000');
+server.listen(PORT, function() {
+    console.log(`Starting server on port ${PORT}`);
 });
 
 // https://opentdb.com/api.php?amount=10&category=9&difficulty=hard&type=multiple
