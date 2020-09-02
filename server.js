@@ -133,7 +133,7 @@ io.on('connection', function(socket) {
             console.log(choices);
 
             // transforming all strings to lowercase
-            choices.map(x => x.toLowerCase());
+            choices = choices.map(x => removePeriod(x.toLowerCase()));
 
             // shuffling order of choices
             shuffle(choices);
@@ -262,4 +262,12 @@ function shuffle(a) {
  
 function logForAll(message) {
     io.sockets.emit('log', message);
+}
+
+function removePeriod(s) {
+    if (s[s.length-1] === ".") {
+        return s.slice(0,-1);
+    }
+
+    return s
 }
