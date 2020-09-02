@@ -143,4 +143,5 @@ socket.on('log', (message) => {
 
 function log(message) {
     logsBox.value += message + '\r\n';
+    logsBox.scrollTop = logsBox.scrollHeight;
 }
