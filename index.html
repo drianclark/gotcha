@@ -16,19 +16,34 @@
                 <input type="text" class="form-control" id="usernameField" placeholder="Enter your username">
             </div>
             <div class="col-3">
-                <button type="button" onclick="onUsernameSubmit()" id="usernameSubmit" class="btn btn-primary">Submit</button>
+                <button type="button" id="usernameSubmit" class="btn btn-primary">Submit</button>
             </div>
         </div>
 
         <div class="lobby" id="lobby">
             <h2>Players</h2>
             <ul id="lobbyPlayersList" class="lobbyPlayersList list-group list-group-flush"></ul>
-            <button onclick="startGame()" id="startGameButton" class="mt-5 btn btn-outline-success startGameButton">Start Game!</button>
+            <button id="startGameButton" class="mt-5 btn btn-outline-success startGameButton">Start Game!</button>
         </div>
 
-        <div class="categoryMenu" id="categoryMenu">
+        <div class="questionContainer" id="questionContainer">
+            <h2>Question</h2>
+            <div class="question" id="question">
+            </div>
+            
+            <div class="form-group madeUpChoiceForm" id="madeUpChoiceForm">
+                <textarea class="form-control" id="userGivenChoice" rows="3"></textarea>
+                <button type="button" id="submitGivenChoice" class="btn btn-primary mt-2">Submit</button>
+            </div>
 
+            <div class="container choices" id="choices">
+
+            </div>
         </div>
+
+        
+        
+
     </div>
 </body>
 

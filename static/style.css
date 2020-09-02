@@ -2,3 +2,9 @@
   display: none; }
   .lobby > .startGameButton {
     display: none; }
+
+.questionContainer {
+  display: none; }
+
+.choices {
+  display: none; }
