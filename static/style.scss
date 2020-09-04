@@ -10,8 +10,20 @@
     display: none;
 }
 
-.choices {
+.choicesContainer {
     display: none;
+}
+
+.resultsContainer {
+    display: none;
+
+    .playerAnswersCol {
+        text-align: right;
+
+        & > p {
+            margin-bottom: 0;
+        }
+    }
 }
 
 .givenChoiceSpinner {

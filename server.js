@@ -40,6 +40,7 @@ var category;
 var answer;
 var playerAnswers = {};
 
+
 // Add the WebSocket handlers
 io.on('connection', function(socket) {
 
@@ -165,16 +166,20 @@ io.on('connection', function(socket) {
 
         if (waitingFor.length == 0) {
             console.log('The correct answer is: ' + userAnswer);
-            console.log(playerAnswers);
 
-            for (const [player, userAnswer] of Object.entries(playerAnswers)) {
-                if (userAnswer == answer) {
+            for (const [player, playerAnswer] of Object.entries(playerAnswers)) {
+                if (playerAnswer == answer) {
                     console.log(player + ' gains a point');
+                    givePoint(player)
+                }
 
-                    try {
-                        players[player].score += 1;
-                    } catch (e) {
-                        console.log(e);
+                else {
+                    // if the player's answer is not their own submitted fake answer
+                    // give a point to the player who made up that answer
+                    if (playerAnswer != playerGivenChoices[username]) {
+                        let gotBy = getPlayerWhoSubmittedFakeAnswer(playerAnswer);
+                        console.log(gotBy);
+                        givePoint(gotBy);
                     }
                 }
 
@@ -183,11 +188,18 @@ io.on('connection', function(socket) {
 
             // filling waitingFor again
             waitingFor = Object.keys(players);
+            
+            let wrongChoices = Object.values(playerGivenChoices).filter(e => { return e !== answer });
 
-            // on roundEnd, clients clean up 
-            io.sockets.emit('roundEnd');
-            // after clients clean up, they emit cleanupDone
+            // show results
+            io.sockets.emit('displayResults', wrongChoices, answer, playerAnswers);
+
+            // after showing results, the clients emit resultsShown
         }
+
+    });
+
+    socket.on('resultsShown', () => {
 
     });
 
@@ -210,8 +222,12 @@ function updatePlayers() {
 }
 
 function showStartButtonToAdmin() {
-    admin = adminQueue[0];
-    io.to(admin).emit('showStartButton')
+    try {
+        admin = adminQueue[0];
+        io.to(admin).emit('showStartButton');
+    } catch (e) {
+    console.log(e);
+    }
 }
 
 function hideStartButtonToAdmin() {
@@ -237,9 +253,10 @@ async function startNewRound() {
     let questionObject = await getRandomQuestion();
     question = Buffer.from(questionObject.question, 'base64').toString();
     answer = Buffer.from(questionObject.correct_answer, 'base64').toString();
+    answer = removePeriod(answer.toLowerCase());
     category = Buffer.from(questionObject.category, 'base64').toString();
 
-    playerAnswers = [];
+    playerAnswers = {};
     playerGivenChoices = [];
 
     waitingFor = Object.keys(players);
@@ -285,4 +302,20 @@ function removePeriod(s) {
 
 function logWaitingFor() {
     logForAll('Waiting for: ' + waitingFor);
+}
+
+function getPlayerWhoSubmittedFakeAnswer(answer) {
+    for (const [player, playerGivenChoice] of Object.entries(playerGivenChoices)) {
+        if (answer == playerGivenChoice) return player;
+    }
+
+    throw "answer is not in submitted choices";
+}
+
+function givePoint(player) {
+    try {
+        players[player].score += 1;
+    } catch (e) {
+        console.log(e);
+    }
 }
