@@ -1,3 +1,9 @@
+$primary-font: 'Oswald', sans-serif;
+$secondary-font: 'Raleway', sans-serif;
+
+body {
+    font-family: $primary-font;    
+}
 
 .rootContainer {
     height: 100vh;
@@ -5,18 +11,47 @@
 
 .usernameForm {
     height: 100vh;
+    margin-top: -5em;
+
+    h1 {
+        font-family: $primary-font;
+        color: dodgerblue;
+        font-size: 10em;
+        margin-bottom: 0.2em;
+    }
+
+    #usernameField {
+        text-align: center;
+        max-width: 60%;
+        min-width: 300px;
+    }
 }
 
-.lobby {
+.lobbyContainer {
     display: none;
+
+    ul {
+        list-style-type: none;
+        margin-top: 2em;
+        padding-left: 0.5em;
+    }
 
     & > .startGameButton {
         display: none;
+    }
+
+    .logs {
+        display: none;
+
+        > .logsBox {
+            width: 100%;
+        }
     }
 }
 
 .questionContainer {
     display: none;
+    height: 100vh;
 }
 
 .choicesContainer {
@@ -50,20 +85,6 @@
 
     .scoreBoard {
         display: none;
-    }
-
-    
-}
-
-.givenChoiceSpinner {
-    display: none;
-}
-
-.logs {
-    display: none;
-
-    > .logsBox {
-        width: 100%;
     }
 }
 

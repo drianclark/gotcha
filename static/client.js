@@ -2,7 +2,7 @@ var socket = io();
 
 var username;
 
-var lobbyContainer = document.getElementById('lobby');
+var lobbyContainer = document.getElementById('lobbyContainer');
 var lobbyPlayersList = document.getElementById('lobbyPlayersList');
 var usernameForm =document.getElementById('usernameForm');
 var usernameField = document.getElementById('usernameField');
@@ -77,7 +77,7 @@ socket.on('playersList', (players) => {
 
     players.forEach(player => {
         let li = document.createElement("li");
-        li.className = "list-group-item";
+        li.className = "joinedPlayer";
 
         li.appendChild(document.createTextNode(player));
         lobbyPlayersList.appendChild(li);

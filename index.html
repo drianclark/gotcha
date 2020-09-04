@@ -8,6 +8,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://rawgit.com/leizongmin/js-xss/master/dist/xss.js"></script>
     <link rel="stylesheet" href="static/style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Oswald&family=Raleway&display=swap" rel="stylesheet">
     <link
         rel="stylesheet"
         href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
@@ -19,9 +20,10 @@
             <div class="usernameForm row align-items-center justify-content-center text-center" 
                  id="usernameForm">
                 <div>
+                    <h1>GOTCHA!</h1>
                     <input
                         type="text"
-                        class="form-control"
+                        class="form-control mx-auto"
                         id="usernameField"
                         placeholder="Enter your username"
                     />
@@ -36,11 +38,11 @@
                 
             </div>
 
-            <div class="lobby" id="lobby">
+            <div class="lobbyContainer container mt-5" id="lobbyContainer">
                 <h2>Players</h2>
                 <ul
                     id="lobbyPlayersList"
-                    class="lobbyPlayersList list-group list-group-flush"
+                    class="lobbyPlayersList"
                 ></ul>
                 <button
                     id="startGameButton"
@@ -48,9 +50,19 @@
                 >
                     Start Game!
                 </button>
+
+                <div class="logs mt-5" id="logs">
+                    <textarea
+                        class="logsBox form-control"
+                        id="logsBox"
+                        rows="6"
+                        readonly
+                    ></textarea>
+                </div>
+
             </div>
 
-            <div class="questionContainer text-center" id="questionContainer">
+            <div class="questionContainer text-center pt-5" id="questionContainer">
                 <div class="question mt-5" id="question"></div>
 
                 <div class="madeUpChoiceForm" id="madeUpChoiceForm">
@@ -86,15 +98,7 @@
                 <div class="results mt-5" id="results"></div>
                 <div class="scoreBoard text-center mt-5" id="scoreBoard"></div>
             </div>
-
-            <div class="container logs mt-5" id="logs">
-                <textarea
-                    class="logsBox form-control"
-                    id="logsBox"
-                    rows="6"
-                    readonly
-                ></textarea>
-            </div>
+            
         </div>
     </body>
 

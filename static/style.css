@@ -1,17 +1,44 @@
+body {
+  font-family: "Oswald", sans-serif; }
+
 .rootContainer {
   height: 100vh; }
 
 .usernameForm {
-  height: 100vh; }
+  height: 100vh;
+  margin-top: -5em; }
 
-.lobby {
+.usernameForm h1 {
+  font-family: "Oswald", sans-serif;
+  color: dodgerblue;
+  font-size: 10em;
+  margin-bottom: 0.2em; }
+
+.usernameForm #usernameField {
+  text-align: center;
+  max-width: 60%;
+  min-width: 300px; }
+
+.lobbyContainer {
   display: none; }
 
-.lobby > .startGameButton {
+.lobbyContainer ul {
+  list-style-type: none;
+  margin-top: 2em;
+  padding-left: 0.5em; }
+
+.lobbyContainer > .startGameButton {
   display: none; }
+
+.lobbyContainer .logs {
+  display: none; }
+
+.lobbyContainer .logs > .logsBox {
+  width: 100%; }
 
 .questionContainer {
-  display: none; }
+  display: none;
+  height: 100vh; }
 
 .choicesContainer {
   display: none; }
@@ -38,15 +65,6 @@
 
 .resultsContainer .scoreBoard {
   display: none; }
-
-.givenChoiceSpinner {
-  display: none; }
-
-.logs {
-  display: none; }
-
-.logs > .logsBox {
-  width: 100%; }
 
 @keyframes fadeIn {
   from {
