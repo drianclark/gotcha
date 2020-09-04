@@ -81,6 +81,10 @@ socket.on('hideStartButton', () => {
     hide(startGameButton);
 })
 
+socket.on('hideLogs', () => {
+    hide(logs);
+})
+
 socket.on('updateQuestion', (question) => {
     show(questionContainer);
     show(madeUpChoiceForm);
@@ -118,13 +122,17 @@ socket.on('displayChoices', (choices => {
 }))
 
 socket.on('roundEnd', () => {
-    // hiding spinner
-
     // hiding choices container
     hide(choicesContainer);
 
+    // hiding results container
+    hide(resultsContainer);
+
     // removing question text
     questionDiv.innerHTML = '';
+
+    // removing results text
+    resultsDiv.innerHTML = '';
 
     // removing text from textarea
     userGivenChoiceField.value = '';
@@ -136,7 +144,7 @@ socket.on('roundEnd', () => {
     socket.emit('cleanupDone', username);
 })
 
-socket.on('displayResults', (wrongChoices, answer, playerAnswers) => {
+socket.on('displayResults', async (wrongChoices, answer, playerAnswers) => {
     console.log(`got answer: ${answer}`);
     console.log(`got wrongChoices: ${wrongChoices}`);
     console.log(playerAnswers);
@@ -199,6 +207,9 @@ socket.on('displayResults', (wrongChoices, answer, playerAnswers) => {
         resultsDiv.appendChild(choiceRow);
     });
 
+    await sleep(3000);
+
+    socket.emit('resultsShown', username);
 });
 
 socket.on('log', (message) => {
@@ -216,4 +227,8 @@ function hide (element) {
 
 function show (element) {
     element.style.display = 'block';
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

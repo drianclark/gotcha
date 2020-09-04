@@ -109,13 +109,7 @@ io.on('connection', function(socket) {
     socket.on('startRound', async () => {
         startNewRound();
 
-        logForAll('--------------------------------------------');
-        logForAll('Round start');
-        logForAll('');
-        logForAll('Gathering fake answers...');
-
         waitingFor = Object.keys(players);
-        logWaitingFor();
         // when the players finish answering, they emit questionChoiceSubmitted
     });
 
@@ -128,7 +122,6 @@ io.on('connection', function(socket) {
 
         // console.log(username + ' has submitted ' + choice);
         // console.log('waiting for ' + waitingFor.length + ' more player(s)');
-        if (waitingFor.length != 0) logWaitingFor();
 
         if (waitingFor.length == 0) {
             console.log(Object.values(playerGivenChoices));
@@ -148,10 +141,6 @@ io.on('connection', function(socket) {
 
             // filling waitingFor again
             waitingFor = Object.keys(players);
-
-            logForAll('');
-            logForAll('Waiting for answers...');
-            logWaitingFor();
         }
     })
 
@@ -160,7 +149,6 @@ io.on('connection', function(socket) {
         playerAnswers[username] = userAnswer;
 
         removeFromWaitingFor(username);
-        logWaitingFor();
 
         console.log(username + ' answered ' + userAnswer);
 
@@ -199,8 +187,12 @@ io.on('connection', function(socket) {
 
     });
 
-    socket.on('resultsShown', () => {
+    socket.on('resultsShown', (username) => {
+        removeFromWaitingFor(username);
 
+        if (waitingFor.length == 0) {
+            io.sockets.emit('roundEnd');
+        }
     });
 
     // after clients are done cleaning up
@@ -261,6 +253,7 @@ async function startNewRound() {
 
     waitingFor = Object.keys(players);
 
+    io.sockets.emit('hideLogs');
     io.sockets.emit('updateQuestion', question);
 }
 
@@ -298,10 +291,6 @@ function removePeriod(s) {
     }
 
     return s
-}
-
-function logWaitingFor() {
-    logForAll('Waiting for: ' + waitingFor);
 }
 
 function getPlayerWhoSubmittedFakeAnswer(answer) {
