@@ -25,7 +25,7 @@ var logsBox = document.getElementById("logsBox");
 
 usernameSubmit.addEventListener("click", () => {
     if (usernameField.value.length != 0) {
-        username = usernameField.value;
+        username = filterXSS(usernameField.value);
         socket.emit('join', username);
     } else {
         alert('Invalid username');
@@ -39,12 +39,13 @@ startGameButton.addEventListener("click", () => {
 submitGivenChoiceButton.addEventListener("click", () => {
     let givenChoice = userGivenChoiceField.value.trim();
 
-    if (givenChoice.match('/^[-@.\/#&+\w\s]*$/')) {
+    if (givenChoice.length != 0) {
+        givenChoice = filterXSS(givenChoice.trim());
         socket.emit('questionChoiceSubmitted', username, givenChoice);
     }
 
     else {
-        alert('Invalid input. Please only use alphanumeric and whitespace characters and any of -@./#&+')
+        alert('Please enter a fake answer');
     }
 })
 
