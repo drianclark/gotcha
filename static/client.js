@@ -1,4 +1,5 @@
 var socket = io();
+
 var username;
 
 var lobbyContainer = document.getElementById('lobby');
@@ -15,6 +16,7 @@ var submitGivenChoiceButton = document.getElementById("submitGivenChoice");
 var choicesContainer = document.getElementById("choicesContainer");
 var resultsContainer = document.getElementById("resultsContainer");
 var resultsDiv = document.getElementById("results");
+var scoreBoard = document.getElementById("scoreBoard");
 var logs = document.getElementById("logs");
 var logsBox = document.getElementById("logsBox");
 
@@ -35,9 +37,15 @@ startGameButton.addEventListener("click", () => {
 })
 
 submitGivenChoiceButton.addEventListener("click", () => {
-    let givenChoice = userGivenChoiceField.value;
+    let givenChoice = userGivenChoiceField.value.trim();
 
-    socket.emit('questionChoiceSubmitted', username, givenChoice);
+    if (givenChoice.match('/^[-@.\/#&+\w\s]*$/')) {
+        socket.emit('questionChoiceSubmitted', username, givenChoice);
+    }
+
+    else {
+        alert('Invalid input. Please only use alphanumeric and whitespace characters and any of -@./#&+')
+    }
 })
 
 usernameField.addEventListener("keyup", function(event) {
@@ -107,10 +115,9 @@ socket.on('displayChoices', (choices => {
 
         let choiceButton = document.createElement('input')
         choiceButton.setAttribute('type', 'button');
-        choiceButton.className = 'btn btn-outline-primary';
+        choiceButton.className = 'btn btn-outline-primary choiceButton';
         choiceButton.value = choice;
         choiceButton.textContent = choice;
-        choiceButton.style.minWidth = "30%";
 
         choiceButton.addEventListener("click", () => {
             socket.emit('answerSubmitted', username, choiceButton.value);
@@ -121,13 +128,45 @@ socket.on('displayChoices', (choices => {
     });
 }))
 
-socket.on('roundEnd', () => {
-    // hiding choices container
-    hide(choicesContainer);
+socket.on('displayResults', async (wrongChoices, answer, playerAnswers) => {
+    console.log(`got answer: ${answer}`);
+    console.log(`got wrongChoices: ${wrongChoices}`);
+    console.log(playerAnswers);
 
-    // hiding results container
+    hide(questionContainer);
+    show(resultsContainer);
+    show(resultsDiv);
+
+    await constructAndShowRoundResults(wrongChoices, answer, playerAnswers);
+
+    await sleep(3000);
+
+    hide(resultsDiv);
+
+    socket.emit('resultsShown', username);
+});
+
+socket.on('displayScores', async (players) => {
+    show(scoreBoard);
+    console.log('scoreboard shown');
+
+    for (const [player, playerDetails] of Object.entries(players)) {
+        let playerScoreRow = document.createElement('h5')
+        playerScoreRow.textContent = `${player}: ${playerDetails.score}`
+
+        scoreBoard.append(playerScoreRow);
+    }
+
+    await sleep(3000);
+
+    hide(scoreBoard);
+    console.log('scoreboard hidden');
     hide(resultsContainer);
 
+    socket.emit('scoresShown', username);
+})
+
+socket.on('roundEnd', () => {
     // removing question text
     questionDiv.innerHTML = '';
 
@@ -140,18 +179,35 @@ socket.on('roundEnd', () => {
     // removing choices
     choicesContainer.innerHTML = '';
 
+    // removing scoreboard
+    scoreBoard.innerHTML = '';
+
     // signal cleanup done
     socket.emit('cleanupDone', username);
 })
 
-socket.on('displayResults', async (wrongChoices, answer, playerAnswers) => {
-    console.log(`got answer: ${answer}`);
-    console.log(`got wrongChoices: ${wrongChoices}`);
-    console.log(playerAnswers);
+socket.on('log', (message) => {
+    log(message);
+})
 
-    hide(questionContainer);
-    show(resultsContainer);
+function log(message) {
+    logsBox.value += message + '\r\n';
+    logsBox.scrollTop = logsBox.scrollHeight;
+}
 
+function hide (element) {
+    element.style.display = 'none';
+}
+
+function show (element) {
+    element.style.display = 'block';
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function constructAndShowRoundResults(wrongChoices, answer, playerAnswers) {
     let answerRow = document.createElement('div')
     answerRow.className = 'choiceRow row align-items-center mb-2'
 
@@ -176,9 +232,12 @@ socket.on('displayResults', async (wrongChoices, answer, playerAnswers) => {
 
     answerRow.appendChild(playersCol);
     answerRow.appendChild(answerCardCol)
+
+    await sleep(1000);
+
     resultsDiv.appendChild(answerRow);
 
-    wrongChoices.forEach(choice => {
+    for (const choice of wrongChoices) {
         let choiceRow = document.createElement('div');
         choiceRow.className = 'choiceRow row align-items-center mb-2';
 
@@ -204,31 +263,8 @@ socket.on('displayResults', async (wrongChoices, answer, playerAnswers) => {
 
         choiceRow.appendChild(playersCol);
         choiceRow.appendChild(choiceCardCol);
+
+        await sleep(1000);
         resultsDiv.appendChild(choiceRow);
-    });
-
-    await sleep(3000);
-
-    socket.emit('resultsShown', username);
-});
-
-socket.on('log', (message) => {
-    log(message);
-})
-
-function log(message) {
-    logsBox.value += message + '\r\n';
-    logsBox.scrollTop = logsBox.scrollHeight;
-}
-
-function hide (element) {
-    element.style.display = 'none';
-}
-
-function show (element) {
-    element.style.display = 'block';
-}
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    };
 }

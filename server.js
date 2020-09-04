@@ -109,7 +109,7 @@ io.on('connection', function(socket) {
     socket.on('startRound', async () => {
         startNewRound();
 
-        waitingFor = Object.keys(players);
+        fillWaitingFor();
         // when the players finish answering, they emit questionChoiceSubmitted
     });
 
@@ -140,7 +140,7 @@ io.on('connection', function(socket) {
             io.sockets.emit('displayChoices', choices);
 
             // filling waitingFor again
-            waitingFor = Object.keys(players);
+            fillWaitingFor();
         }
     })
 
@@ -153,7 +153,7 @@ io.on('connection', function(socket) {
         console.log(username + ' answered ' + userAnswer);
 
         if (waitingFor.length == 0) {
-            console.log('The correct answer is: ' + userAnswer);
+            console.log('The correct answer is: ' + answer);
 
             for (const [player, playerAnswer] of Object.entries(playerAnswers)) {
                 if (playerAnswer == answer) {
@@ -175,7 +175,7 @@ io.on('connection', function(socket) {
             }
 
             // filling waitingFor again
-            waitingFor = Object.keys(players);
+            fillWaitingFor();
             
             let wrongChoices = Object.values(playerGivenChoices).filter(e => { return e !== answer });
 
@@ -191,8 +191,19 @@ io.on('connection', function(socket) {
         removeFromWaitingFor(username);
 
         if (waitingFor.length == 0) {
+            fillWaitingFor();
+            io.sockets.emit('displayScores', players);
+        }
+    });
+
+    socket.on('scoresShown', (username) => {
+        removeFromWaitingFor(username);
+
+        if (waitingFor.length == 0) {
+            fillWaitingFor();
             io.sockets.emit('roundEnd');
         }
+
     });
 
     // after clients are done cleaning up
@@ -251,7 +262,7 @@ async function startNewRound() {
     playerAnswers = {};
     playerGivenChoices = [];
 
-    waitingFor = Object.keys(players);
+    fillWaitingFor();
 
     io.sockets.emit('hideLogs');
     io.sockets.emit('updateQuestion', question);
@@ -307,4 +318,8 @@ function givePoint(player) {
     } catch (e) {
         console.log(e);
     }
+}
+
+function fillWaitingFor() {
+    waitingFor = Object.keys(players);
 }

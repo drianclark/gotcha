@@ -12,18 +12,38 @@
 
 .choicesContainer {
     display: none;
+
+    .choiceButton {
+        min-width: 30%;
+    }
 }
 
 .resultsContainer {
     display: none;
+    
+    .choiceRow {
+        animation-name: fadeIn;
+        animation-duration: 1s;
+        animation-timing-function: ease-in-out;
 
-    .playerAnswersCol {
-        text-align: right;
+        & > .playerAnswersCol {
+            text-align: right;
 
-        & > p {
-            margin-bottom: 0;
+            & > p {
+                margin-bottom: 0;
+            }
+        }
+
+        .choiceCard > button {
+            min-width: 30%;
         }
     }
+
+    .scoreBoard {
+        display: none;
+    }
+
+    
 }
 
 .givenChoiceSpinner {
@@ -35,5 +55,14 @@
 
     > .logsBox {
         width: 100%;
-    } 
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 100;
+    }
 }

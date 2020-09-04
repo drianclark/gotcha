@@ -10,14 +10,28 @@
 .choicesContainer {
   display: none; }
 
+.choicesContainer .choiceButton {
+  min-width: 30%; }
+
 .resultsContainer {
   display: none; }
 
-.resultsContainer .playerAnswersCol {
+.resultsContainer .choiceRow {
+  animation-name: fadeIn;
+  animation-duration: 1s;
+  animation-timing-function: ease-in-out; }
+
+.resultsContainer .choiceRow > .playerAnswersCol {
   text-align: right; }
 
-.resultsContainer .playerAnswersCol > p {
+.resultsContainer .choiceRow > .playerAnswersCol > p {
   margin-bottom: 0; }
+
+.resultsContainer .choiceRow .choiceCard > button {
+  min-width: 30%; }
+
+.resultsContainer .scoreBoard {
+  display: none; }
 
 .givenChoiceSpinner {
   display: none; }
@@ -27,3 +41,9 @@
 
 .logs > .logsBox {
   width: 100%; }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0; }
+  to {
+    opacity: 100; } }
