@@ -41,6 +41,8 @@ submitGivenChoiceButton.addEventListener("click", () => {
 
     if (givenChoice.length != 0) {
         givenChoice = filterXSS(givenChoice.trim());
+
+        hide()
         socket.emit('questionChoiceSubmitted', username, givenChoice);
     }
 
