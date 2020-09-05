@@ -9,6 +9,7 @@ const usernameSubmit = document.getElementById('usernameSubmit')
 const startGameButton = document.getElementById('startGameButton');
 const questionContainer = document.getElementById('questionContainer');
 const questionDiv = document.getElementById("question");
+const categoryText = document.getElementById("categoryText");
 const madeUpChoiceForm = document.getElementById("madeUpChoiceForm");
 const userGivenChoiceField = document.getElementById("userGivenChoice");
 const submitGivenChoiceButton = document.getElementById("submitGivenChoice");
@@ -111,7 +112,7 @@ socket.on('hideLogs', () => {
     hide(logs);
 })
 
-socket.on('initaliseRoundStart', (question, players) => {
+socket.on('initaliseRoundStart', (question, category, players) => {
     show(questionContainer);
     show(skipQuestionButton);
     show(bottomContainer);
@@ -121,6 +122,8 @@ socket.on('initaliseRoundStart', (question, players) => {
     let questionText = document.createElement("h5");
     questionText.appendChild(document.createTextNode(question));
     questionDiv.appendChild(questionText);
+
+    categoryText.textContent = category;
 
     scoresList.innerHTML = '';
     for (const [player, playerDetails] of Object.entries(players)) {

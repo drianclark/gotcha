@@ -303,7 +303,7 @@ async function startNewRound() {
     fillWaitingFor();
 
     io.sockets.emit('hideLogs');
-    io.sockets.emit('initaliseRoundStart', question, players);
+    io.sockets.emit('initaliseRoundStart', question, category, players);
 }
 
 async function getRandomQuestion() {
