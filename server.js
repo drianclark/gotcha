@@ -265,17 +265,15 @@ async function startNewRound() {
     answer = removePeriod(answer.toLowerCase());
     category = Buffer.from(questionObject.category, 'base64').toString();
 
-    askedQuestions[hash(answer)] = 1;
-
     while (hash(answer) in askedQuestions) {
         let questionObject = await getRandomQuestion();
         question = Buffer.from(questionObject.question, 'base64').toString();
         answer = Buffer.from(questionObject.correct_answer, 'base64').toString();
         answer = removePeriod(answer.toLowerCase());
         category = Buffer.from(questionObject.category, 'base64').toString();
-
-        askedQuestions[hash(answer)] = 1;
     }
+    
+    askedQuestions[hash(answer)] = 1;
     
     playerAnswers = {};
     playerGivenChoices = [];
