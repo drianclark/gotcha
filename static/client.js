@@ -1,24 +1,25 @@
-var socket = io();
-
+const socket = io();
 var username;
 
-var lobbyContainer = document.getElementById('lobbyContainer');
-var lobbyPlayersList = document.getElementById('lobbyPlayersList');
-var usernameForm =document.getElementById('usernameForm');
-var usernameField = document.getElementById('usernameField');
-var usernameSubmit = document.getElementById('usernameSubmit')
-var startGameButton = document.getElementById('startGameButton');
-var questionContainer = document.getElementById('questionContainer');
-var questionDiv = document.getElementById("question");
-var madeUpChoiceForm = document.getElementById("madeUpChoiceForm");
-var userGivenChoiceField = document.getElementById("userGivenChoice");
-var submitGivenChoiceButton = document.getElementById("submitGivenChoice");
-var choicesContainer = document.getElementById("choicesContainer");
-var resultsContainer = document.getElementById("resultsContainer");
-var resultsDiv = document.getElementById("results");
-var scoreBoard = document.getElementById("scoreBoard");
-var logs = document.getElementById("logs");
-var logsBox = document.getElementById("logsBox");
+const lobbyContainer = document.getElementById('lobbyContainer');
+const lobbyPlayersList = document.getElementById('lobbyPlayersList');
+const usernameForm =document.getElementById('usernameForm');
+const usernameField = document.getElementById('usernameField');
+const usernameSubmit = document.getElementById('usernameSubmit')
+const startGameButton = document.getElementById('startGameButton');
+const questionContainer = document.getElementById('questionContainer');
+const questionDiv = document.getElementById("question");
+const madeUpChoiceForm = document.getElementById("madeUpChoiceForm");
+const userGivenChoiceField = document.getElementById("userGivenChoice");
+const submitGivenChoiceButton = document.getElementById("submitGivenChoice");
+const choicesContainer = document.getElementById("choicesContainer");
+const resultsContainer = document.getElementById("resultsContainer");
+const resultsDiv = document.getElementById("results");
+const scoreBoard = document.getElementById("scoreBoard");
+const waitingForContainer = document.getElementById("waitingForContainer");
+const waitingForText = document.getElementById("waitingFor");
+const logs = document.getElementById("logs");
+const logsBox = document.getElementById("logsBox");
 
 
 // var givenChoiceSpinner = document.getElementById("givenChoiceSpinner");
@@ -42,7 +43,11 @@ submitGivenChoiceButton.addEventListener("click", () => {
     if (givenChoice.length != 0) {
         givenChoice = filterXSS(givenChoice.trim());
 
-        hide()
+        hide(questionContainer);
+        hide(madeUpChoiceForm);
+
+        show(waitingForContainer, 'flex');
+
         socket.emit('questionChoiceSubmitted', username, givenChoice);
     }
 
@@ -98,18 +103,24 @@ socket.on('hideLogs', () => {
 
 socket.on('updateQuestion', (question) => {
     show(questionContainer);
-    show(madeUpChoiceForm);
+    show(madeUpChoiceForm, 'flex');
     hide(lobbyContainer);
 
-    let p = document.createElement("p");
+    let questionText = document.createElement("h5");
 
-    p.appendChild(document.createTextNode(question));
+    questionText.appendChild(document.createTextNode(question));
 
-    questionDiv.appendChild(p);
+    questionDiv.appendChild(questionText);
+})
+
+socket.on('updatedWaitingFor', (waitingFor) => {
+    console.table(waitingFor);
+    waitingForText.innerHTML = waitingFor.join(', ');
 })
 
 socket.on('displayChoices', (choices => {
-    hide(madeUpChoiceForm);
+    hide(waitingForContainer);
+    show(questionContainer);
     show(choicesContainer);
 
     choices.forEach(choice => {
@@ -199,11 +210,16 @@ function log(message) {
 }
 
 function hide (element) {
-    element.style.display = 'none';
+    element.style.setProperty("display", "none", "important");
 }
 
-function show (element) {
-    element.style.display = 'block';
+function show (element, displayParam=null) {
+    if (displayParam != null) {
+        element.style.setProperty("display", displayParam, "important");
+        return;
+    }
+
+    element.style.setProperty("display", "block", "important");
 }
 
 function sleep(ms) {

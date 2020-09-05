@@ -22,7 +22,7 @@ body {
 
     #usernameField {
         text-align: center;
-        max-width: 60%;
+        max-width: 40%;
         min-width: 300px;
     }
 }
@@ -51,7 +51,13 @@ body {
 
 .questionContainer {
     display: none;
-    height: 100vh;
+
+    .madeUpChoiceForm {
+        textarea {
+            max-width: 60%;
+            min-width: 600px;
+        }
+    }
 }
 
 .choicesContainer {
@@ -61,6 +67,12 @@ body {
         min-width: 30%;
     }
 }
+
+.waitingForContainer {
+    display: none !important;
+    height: 100vh;
+}
+
 
 .resultsContainer {
     display: none;
@@ -87,6 +99,7 @@ body {
         display: none;
     }
 }
+
 
 @keyframes fadeIn {
     from {

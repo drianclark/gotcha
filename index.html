@@ -8,7 +8,10 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://rawgit.com/leizongmin/js-xss/master/dist/xss.js"></script>
     <link rel="stylesheet" href="static/style.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Oswald&family=Raleway&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Oswald&family=Raleway&display=swap"
+        rel="stylesheet"
+    />
     <link
         rel="stylesheet"
         href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
@@ -17,9 +20,11 @@
     />
     <body>
         <div class="container rootContainer">
-            <div class="usernameForm row align-items-center justify-content-center text-center" 
-                 id="usernameForm">
-                <div>
+            <div
+                class="usernameForm row align-items-center justify-content-center text-center"
+                id="usernameForm"
+            >
+                <div class="col-12">
                     <h1>GOTCHA!</h1>
                     <input
                         type="text"
@@ -35,15 +40,11 @@
                         Submit
                     </button>
                 </div>
-                
             </div>
 
             <div class="lobbyContainer container mt-5" id="lobbyContainer">
                 <h2>Players</h2>
-                <ul
-                    id="lobbyPlayersList"
-                    class="lobbyPlayersList"
-                ></ul>
+                <ul id="lobbyPlayersList" class="lobbyPlayersList"></ul>
                 <button
                     id="startGameButton"
                     class="mt-5 btn btn-outline-success startGameButton"
@@ -59,26 +60,34 @@
                         readonly
                     ></textarea>
                 </div>
-
             </div>
 
-            <div class="questionContainer text-center pt-5" id="questionContainer">
+            <div
+                class="questionContainer text-center pt-5"
+                id="questionContainer"
+            >
                 <div class="question mt-5" id="question"></div>
 
-                <div class="madeUpChoiceForm" id="madeUpChoiceForm">
-                    <textarea
-                        class="form-control"
-                        id="userGivenChoice"
-                        rows="3"
-                        placeholder="Write down a fake answer!"
-                    ></textarea>
-                    <button
-                        type="button"
-                        id="submitGivenChoice"
-                        class="btn btn-primary mt-2"
-                    >
-                        Submit
-                    </button>
+                <div class="madeUpChoiceForm mt-3 row" id="madeUpChoiceForm">
+                    <div class="offset-md-2 col-md-6 col-sm-12">
+                        <textarea
+                            class="form-control mx-auto text-center"
+                            id="userGivenChoice"
+                            rows="3"
+                            placeholder="Write down a fake answer!"
+                        ></textarea>
+                    </div>
+
+                    <div class="col-md-2 col-sm-12 text-left align-self-center">
+                        <button
+                            type="button"
+                            id="submitGivenChoice"
+                            class="btn btn-primary"
+                        >
+                            Submit
+                        </button>
+                    </div>
+
                     <!-- <i class="fas fa-circle-notch fa-spin givenChoiceSpinner" id="givenChoiceSpinner"></i> -->
                 </div>
 
@@ -89,16 +98,20 @@
             </div>
 
             <div
-                class="waitingForContainer container text-center"
+                class="waitingForContainer align-items-center justify-content-center text-center row"
                 id="waitingForContainer"
-            ></div>
+            >
+                <div>
+                    <h2>Waiting for</h2>
+                    <h4 id="waitingFor"></h4>
+                </div>
+            </div>
 
-            <div class="resultsContainer container" id="resultsContainer">
+            <div class="resultsContainer container pt-5" id="resultsContainer">
                 <h2>Results</h2>
                 <div class="results mt-5" id="results"></div>
                 <div class="scoreBoard text-center mt-5" id="scoreBoard"></div>
             </div>
-            
         </div>
     </body>
 

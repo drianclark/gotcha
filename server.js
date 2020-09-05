@@ -118,6 +118,7 @@ io.on('connection', function(socket) {
 
         // remove player from waitingFor array
         removeFromWaitingFor(username);
+        socket.emit('updatedWaitingFor', waitingFor);
 
         // console.log(username + ' has submitted ' + choice);
         // console.log('waiting for ' + waitingFor.length + ' more player(s)');
@@ -148,6 +149,8 @@ io.on('connection', function(socket) {
         playerAnswers[username] = userAnswer;
 
         removeFromWaitingFor(username);
+
+        socket.emit('updatedWaitingFor', waitingFor);
 
         console.log(username + ' answered ' + userAnswer);
 
