@@ -16,6 +16,8 @@ const triviaCategories = {
     'animals': 'https://opentdb.com/api.php?amount=1&category=27&difficulty=hard&type=multiple&encode=base64'
 }
 
+var askedQuestions = [];
+
 const PORT = process.env.PORT || 5000;
 app.set('port', PORT);
 app.use('/static', express.static(__dirname + '/static'));
@@ -263,6 +265,18 @@ async function startNewRound() {
     answer = removePeriod(answer.toLowerCase());
     category = Buffer.from(questionObject.category, 'base64').toString();
 
+    askedQuestions[hash(answer)] = 1;
+
+    while (hash(answer) in askedQuestions) {
+        let questionObject = await getRandomQuestion();
+        question = Buffer.from(questionObject.question, 'base64').toString();
+        answer = Buffer.from(questionObject.correct_answer, 'base64').toString();
+        answer = removePeriod(answer.toLowerCase());
+        category = Buffer.from(questionObject.category, 'base64').toString();
+
+        askedQuestions[hash(answer)] = 1;
+    }
+    
     playerAnswers = {};
     playerGivenChoices = [];
 
@@ -326,4 +340,8 @@ function givePoint(player) {
 
 function fillWaitingFor() {
     waitingFor = Object.keys(players);
+}
+
+function hash(s) {
+    return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);              
 }
