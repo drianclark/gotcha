@@ -28,6 +28,7 @@ server.listen(PORT, function() {
     console.log(`Starting server on port ${PORT}`);
 });
 
+var askedQuestions = {};
 var players = {};
 var adminQueue = [];
 var waitingFor = [];
@@ -36,7 +37,7 @@ var question;
 var category;
 var answer;
 var playerAnswers = {};
-var askedQuestions = {};
+var skipVotes = [];
 
 
 // Add the WebSocket handlers
@@ -114,7 +115,7 @@ io.on('connection', function(socket) {
     // after a fake answer choice has been submitted
     socket.on('questionChoiceSubmitted', (username, choice) => {
         // handle duplicate choice
-        let playerSocketID = getUserSocketID(username);
+        let playerSocketID = socket.id;
 
         if (Object.values(playerGivenChoices).includes(choice) || choice == answer) {
             io.to(playerSocketID).emit('givenChoiceError', choice);
@@ -129,9 +130,6 @@ io.on('connection', function(socket) {
         // remove player from waitingFor array
         removeFromWaitingFor(username);
         socket.emit('updatedWaitingFor', waitingFor);
-
-        // console.log(username + ' has submitted ' + choice);
-        // console.log('waiting for ' + waitingFor.length + ' more player(s)');
 
         if (waitingFor.length == 0) {
             console.log(Object.values(playerGivenChoices));
@@ -154,10 +152,25 @@ io.on('connection', function(socket) {
         }
     })
 
+    socket.on('skipVoteSubmitted', (username) => {
+        let playerSocketID = socket.id;
+        console.log(playerSocketID);
+        // add user to array of skipVotes
+        skipVotes.push(username)
+
+        io.sockets.emit('skipVoteReceived', username);
+
+        // check all players voted to skip
+        if (allPlayersVotedToSkip()) {
+            skipVotes = [];
+            io.sockets.emit('roundEnd');
+        }
+    })
+
     // after an answer has been submitted
     socket.on('answerSubmitted', (username, userAnswer) => {
         playerAnswers[username] = userAnswer;
-        let playerSocketID = getUserSocketID(username);
+        let playerSocketID = socket.id;
 
 
         removeFromWaitingFor(username);
@@ -339,14 +352,22 @@ function fillWaitingFor() {
     waitingFor = Object.keys(players);
 }
 
-function getUserSocketID(username) {
-    for (const [player, playerDetails] of Object.entries(players)) {
-        if (player == username) return playerDetails.socketID;
-    }
-
-    console.log(`no player with username ${username}`);
-}
-
 function hash (s) {
     return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);              
+}
+
+function allPlayersVotedToSkip(){
+    let voteHashmap = {}
+
+    for (const player of skipVotes) {
+        voteHashmap[player] = 1;    
+    }
+
+    console.log(voteHashmap);
+
+    for (const p of Object.keys(players)) {
+        if (voteHashmap[p] == undefined) return false;
+    }
+
+    return true;
 }

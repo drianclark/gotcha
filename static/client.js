@@ -15,15 +15,16 @@ const submitGivenChoiceButton = document.getElementById("submitGivenChoice");
 const choicesContainer = document.getElementById("choicesContainer");
 const resultsContainer = document.getElementById("resultsContainer");
 const resultsDiv = document.getElementById("results");
+const skipQuestionButton = document.getElementById("skipQuestionButton");
+const skipQuestionSpinner = document.getElementById("skipQuestionSpinner");
+const skipQuestionCheck = document.getElementById("skipQuestionCheck");
 const waitingForContainer = document.getElementById("waitingForContainer");
 const waitingForText = document.getElementById("waitingFor");
-const scoreBoardContainer = document.getElementById("scoreBoardContainer");
+const bottomContainer = document.getElementById("bottomContainer");
 const scoresList = document.getElementById("scoresList");
+const notificationsContainer = document.getElementById("notificationsContainer");
 const logs = document.getElementById("logs");
 const logsBox = document.getElementById("logsBox");
-
-
-// var givenChoiceSpinner = document.getElementById("givenChoiceSpinner");
 
 usernameSubmit.addEventListener("click", () => {
     if (usernameField.value.length != 0) {
@@ -42,7 +43,7 @@ submitGivenChoiceButton.addEventListener("click", () => {
     let givenChoice = userGivenChoiceField.value.trim();
 
     if (givenChoice.length != 0) {
-        givenChoice = filterXSS(givenChoice.trim());
+        givenChoice = filterXSS(givenChoice.trim().toLowerCase());
 
         socket.emit('questionChoiceSubmitted', username, givenChoice);
     }
@@ -68,6 +69,12 @@ userGivenChoiceField.addEventListener("keydown", function(event) {
         event.preventDefault();
         submitGivenChoiceButton.click();
     }
+});
+
+skipQuestionButton.addEventListener("click", () => {
+    socket.emit('skipVoteSubmitted', username);
+    skipQuestionButton.disabled = true;
+    show(skipQuestionSpinner);
 });
 
 socket.on('joinFail', (errorMessage) => {
@@ -106,6 +113,8 @@ socket.on('hideLogs', () => {
 
 socket.on('initaliseRoundStart', (question, players) => {
     show(questionContainer);
+    show(skipQuestionButton);
+    show(bottomContainer);
     show(madeUpChoiceForm, 'flex');
     hide(lobbyContainer);
 
@@ -122,8 +131,21 @@ socket.on('initaliseRoundStart', (question, players) => {
         scoresList.appendChild(playerScoreLI);
     }
 
-    show(scoreBoardContainer);
+    show(bottomContainer);
 })
+
+socket.on('skipVoteReceived', (voter) => {
+    // if this client submitted the vote
+    if (voter === username) {
+        show(skipQuestionCheck);
+        hide(skipQuestionSpinner);
+    }
+
+    let skipVoteNotification = document.createElement('p');
+    skipVoteNotification.className = 'mb-0';
+    skipVoteNotification.textContent = `${voter} voted to skip question`
+    notificationsContainer.appendChild(skipVoteNotification)
+});
 
 socket.on('givenChoiceError', (choice) => {
     alert(`Duplicate choice: ${choice}`);
@@ -142,7 +164,9 @@ socket.on('updatedWaitingFor', (waitingFor) => {
 
 socket.on('displayChoices', (choices => {
     hide(waitingForContainer);
+    hide(bottomContainer);
     show(questionContainer);
+    hide(skipQuestionButton);
     show(choicesContainer);
 
     choices.forEach(choice => {
@@ -172,7 +196,7 @@ socket.on('answerReceived', (waitingFor) => {
 })
 
 socket.on('displayResults', async (wrongChoices, answer, playerAnswers) => {
-    hide(scoreBoardContainer);
+    hide(bottomContainer);
     hide(waitingForContainer);
     show(resultsContainer);
     show(resultsDiv);
@@ -198,6 +222,13 @@ socket.on('roundEnd', () => {
 
     // removing choices
     choicesContainer.innerHTML = '';
+
+    // removing notifications text
+    notificationsContainer.innerHTML = '';
+
+    skipQuestionButton.disabled = false;
+    hide(skipQuestionSpinner);
+    hide(skipQuestionCheck);
 
     // signal cleanup done
     socket.emit('cleanupDone', username);

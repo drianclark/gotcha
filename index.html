@@ -18,6 +18,7 @@
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
         crossorigin="anonymous"
     />
+    <link rel="stylesheet" href="static/fontawesome-free-5.14.0-web/css/all.min.css"/>
     <body>
         <div class="container rootContainer">
             <div
@@ -79,18 +80,31 @@
                     </div>
 
                     <div
-                        class="col-md-2 col-sm-12 text-left align-self-stretch pl-0"
+                        class="col-md-2 col-sm-12 text-left align-self-stretch px-0"
                     >
                         <button
                             type="button"
                             id="submitGivenChoice"
-                            class="btn btn-primary h-100"
+                            class="btn btn-primary h-100 w-100"
                         >
                             Submit
                         </button>
                     </div>
-
                     <!-- <i class="fas fa-circle-notch fa-spin givenChoiceSpinner" id="givenChoiceSpinner"></i> -->
+                </div>
+
+                <div class="skipQuestionRow row mt-3" id="skipQuestionRow">
+                    <div class="offset-md-10 col-md-2 col-sm-12 text-left px-0">
+                        <button
+                            type="button"
+                            id="skipQuestionButton"
+                            class="skipQuestionButton btn btn-danger h-100 w-100"
+                        >Skip Question
+                        <i class="skipQuestionSpinner fas fa-circle-notch fa-spin" id="skipQuestionSpinner"></i>
+                        <i class="skipQuestionCheck far fa-check-circle" id="skipQuestionCheck"></i>    
+                    </button>
+
+                    </div>
                 </div>
 
                 <div
@@ -118,19 +132,29 @@
                 ></div> -->
             </div>
 
-            <div class="scoreBoardContainer container mt-5" id="scoreBoardContainer">
+            <div
+                class="bottomContainer container mt-5"
+                id="bottomContainer"
+            >
                 <div class="row">
-                    <div class="col-md-4 col-sm-12">
-                        <div class="card scoreBoard text-center" id="scoreBoard">
+                    <div class="scoreBoardContainer col-md-4 col-sm-12" id="scoreBoardContainer">
+                        <div
+                            class="card scoreBoard text-center"
+                            id="scoreBoard"
+                        >
                             <div class="card-body py-2">
                                 <h4 class="card-title mb-3">Scores</h4>
                                 <ul
-                                    class="scoresList list-group list-group-flush list-unstyled" id="scoresList"
-                                >
-                                </ul>
+                                    class="scoresList list-group list-group-flush list-unstyled"
+                                    id="scoresList"
+                                ></ul>
                             </div>
                         </div>
                     </div>
+
+                    <div class="notificationsContainer col-md-8 col-sm-12" id="notificationsContainer">
+                    </div>  
+
                 </div>
             </div>
         </div>

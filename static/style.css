@@ -42,6 +42,15 @@ body {
 .questionContainer .madeUpChoiceForm textarea {
   max-width: 700px; }
 
+.questionContainer .skipQuestionRow .skipQuestionButton {
+  white-space: normal; }
+
+.questionContainer .skipQuestionRow .skipQuestionButton .skipQuestionSpinner {
+  display: none; }
+
+.questionContainer .skipQuestionRow .skipQuestionButton .skipQuestionCheck {
+  display: none; }
+
 .choicesContainer {
   display: none; }
 
@@ -72,7 +81,7 @@ body {
 .resultsContainer .roundScores {
   display: none; }
 
-.scoreBoardContainer {
+.bottomContainer {
   display: none; }
 
 @keyframes fadeIn {
