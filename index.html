@@ -1,54 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport">
-    <title>Gotcha!</title>
-</head>
-<script src="/socket.io/socket.io.js"></script>
-<link rel="stylesheet" href="static/style.css">
-<link rel="stylesheet" href="static/fontawesome-free-5.14.0-web/css/all.min.css">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-<body>
-    <div class="container mt-5">
-
-        <div class="row" id="usernameForm">
-            <div class="col-3">
-                <input type="text" class="form-control" id="usernameField" placeholder="Enter your username">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" />
+        <title>Gotcha!</title>
+    </head>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://rawgit.com/leizongmin/js-xss/master/dist/xss.js"></script>
+    <link rel="stylesheet" href="static/style.css" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Oswald&family=Raleway&display=swap"
+        rel="stylesheet"
+    />
+    <link
+        rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous"
+    />
+    <body>
+        <div class="container rootContainer">
+            <div
+                class="usernameForm row align-items-center justify-content-center text-center"
+                id="usernameForm"
+            >
+                <div class="col-12">
+                    <h1>GOTCHA!</h1>
+                    <input
+                        type="text"
+                        class="form-control mx-auto"
+                        id="usernameField"
+                        placeholder="Enter your username"
+                    />
+                    <button
+                        type="button"
+                        id="usernameSubmit"
+                        class="btn btn-primary mt-2"
+                    >
+                        Submit
+                    </button>
+                </div>
             </div>
-            <div class="col-3">
-                <button type="button" id="usernameSubmit" class="btn btn-primary">Submit</button>
+
+            <div class="lobbyContainer container mt-5" id="lobbyContainer">
+                <h2>Players</h2>
+                <ul id="lobbyPlayersList" class="lobbyPlayersList"></ul>
+                <button
+                    id="startGameButton"
+                    class="mt-5 btn btn-outline-success startGameButton"
+                >
+                    Start Game!
+                </button>
+
+                <div class="logs mt-5" id="logs">
+                    <textarea
+                        class="logsBox form-control"
+                        id="logsBox"
+                        rows="6"
+                        readonly
+                    ></textarea>
+                </div>
+            </div>
+
+            <div
+                class="questionContainer text-center pt-5"
+                id="questionContainer"
+            >
+                <div class="question mt-5" id="question"></div>
+
+                <div class="madeUpChoiceForm mt-3 row" id="madeUpChoiceForm">
+                    <div class="offset-md-2 col-md-6 col-sm-12">
+                        <textarea
+                            class="form-control mx-auto text-center"
+                            id="userGivenChoice"
+                            rows="3"
+                            placeholder="Write down a fake answer!"
+                        ></textarea>
+                    </div>
+
+                    <div class="col-md-2 col-sm-12 text-left align-self-center">
+                        <button
+                            type="button"
+                            id="submitGivenChoice"
+                            class="btn btn-primary"
+                        >
+                            Submit
+                        </button>
+                    </div>
+
+                    <!-- <i class="fas fa-circle-notch fa-spin givenChoiceSpinner" id="givenChoiceSpinner"></i> -->
+                </div>
+
+                <div
+                    class="choicesContainer container"
+                    id="choicesContainer"
+                ></div>
+            </div>
+
+            <div
+                class="waitingForContainer align-items-center justify-content-center text-center row"
+                id="waitingForContainer"
+            >
+                <div>
+                    <h2>Waiting for</h2>
+                    <h4 id="waitingFor"></h4>
+                </div>
+            </div>
+
+            <div class="resultsContainer container pt-5" id="resultsContainer">
+                <h2>Results</h2>
+                <div class="results mt-5" id="results"></div>
+                <div class="scoreBoard text-center mt-5" id="scoreBoard"></div>
             </div>
         </div>
+    </body>
 
-        <div class="lobby" id="lobby">
-            <h2>Players</h2>
-            <ul id="lobbyPlayersList" class="lobbyPlayersList list-group list-group-flush"></ul>
-            <button id="startGameButton" class="mt-5 btn btn-outline-success startGameButton">Start Game!</button>
-        </div>
-
-        <div class="questionContainer" id="questionContainer">
-            <h2>Question</h2>
-            <div class="question" id="question">
-            </div>
-            
-            <div class="madeUpChoiceForm" id="madeUpChoiceForm">
-                <textarea class="form-control" id="userGivenChoice" rows="3"></textarea>
-                <button type="button" id="submitGivenChoice" class="btn btn-primary mt-2">Submit</button>
-                <!-- <i class="fas fa-circle-notch fa-spin givenChoiceSpinner" id="givenChoiceSpinner"></i> -->
-            </div>
-
-            <div class="container choices" id="choices">
-
-            </div>
-        
-        </div>
-
-        <div class="container logs mt-5" id="logs">
-            <textarea class="logsBox form-control" id="logsBox" rows="6" readonly></textarea>
-        </div>
-    </div>
-</body>
-
-<script src="/static/client.js"></script>
+    <script src="/static/client.js"></script>
 </html>

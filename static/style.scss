@@ -1,27 +1,111 @@
-.lobby {
+$primary-font: 'Oswald', sans-serif;
+$secondary-font: 'Raleway', sans-serif;
+
+body {
+    font-family: $primary-font;    
+}
+
+.rootContainer {
+    height: 100vh;
+}
+
+.usernameForm {
+    height: 100vh;
+    margin-top: -5em;
+
+    h1 {
+        font-family: $primary-font;
+        color: dodgerblue;
+        font-size: 10em;
+        margin-bottom: 0.2em;
+    }
+
+    #usernameField {
+        text-align: center;
+        max-width: 40%;
+        min-width: 300px;
+    }
+}
+
+.lobbyContainer {
     display: none;
+
+    ul {
+        list-style-type: none;
+        margin-top: 2em;
+        padding-left: 0.5em;
+    }
 
     & > .startGameButton {
         display: none;
+    }
+
+    .logs {
+        display: none;
+
+        > .logsBox {
+            width: 100%;
+        }
     }
 }
 
 .questionContainer {
     display: none;
+
+    .madeUpChoiceForm {
+        textarea {
+            max-width: 60%;
+            min-width: 600px;
+        }
+    }
 }
 
-.choices {
+.choicesContainer {
     display: none;
+
+    .choiceButton {
+        min-width: 30%;
+    }
 }
 
-.givenChoiceSpinner {
-    display: none;
+.waitingForContainer {
+    display: none !important;
+    height: 100vh;
 }
 
-.logs {
-    display: none;
 
-    > .logsBox {
-        width: 100%;
-    } 
+.resultsContainer {
+    display: none;
+    
+    .choiceRow {
+        animation-name: fadeIn;
+        animation-duration: 1s;
+        animation-timing-function: ease-in-out;
+
+        & > .playerAnswersCol {
+            text-align: right;
+
+            & > p {
+                margin-bottom: 0;
+            }
+        }
+
+        .choiceCard > button {
+            min-width: 30%;
+        }
+    }
+
+    .scoreBoard {
+        display: none;
+    }
+}
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 100;
+    }
 }
