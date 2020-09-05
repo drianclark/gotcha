@@ -36,6 +36,7 @@ var question;
 var category;
 var answer;
 var playerAnswers = {};
+var askedQuestions = {};
 
 
 // Add the WebSocket handlers
@@ -156,10 +157,15 @@ io.on('connection', function(socket) {
     // after an answer has been submitted
     socket.on('answerSubmitted', (username, userAnswer) => {
         playerAnswers[username] = userAnswer;
+        let playerSocketID = getUserSocketID(username);
+
 
         removeFromWaitingFor(username);
 
+        // updates waiting for in all clients
         socket.emit('updatedWaitingFor', waitingFor);
+        // displays waiting for
+        io.to(playerSocketID).emit('answerReceived', waitingFor);
 
         console.log(username + ' answered ' + userAnswer);
 
@@ -255,11 +261,18 @@ function removeFromWaitingFor(username) {
 }
 
 async function startNewRound() {
-    let questionObject = await getRandomQuestion();
-    question = Buffer.from(questionObject.question, 'base64').toString();
-    answer = Buffer.from(questionObject.correct_answer, 'base64').toString();
-    answer = removePeriod(answer.toLowerCase());
-    category = Buffer.from(questionObject.category, 'base64').toString();
+    do {
+        let questionObject = await getRandomQuestion();
+        question = Buffer.from(questionObject.question, 'base64').toString();
+        answer = Buffer.from(questionObject.correct_answer, 'base64').toString();
+        answer = removePeriod(answer.toLowerCase());
+        category = Buffer.from(questionObject.category, 'base64').toString();
+    
+        // keep fetching questions if the current question has already been asked or is undefined
+    } while (askedQuestions[hash(answer)] != undefined || answer == undefined);
+    
+    // once we've seen a new question, mark it as already seen
+    askedQuestions[hash(answer)] = 1;
 
     playerAnswers = {};
     playerGivenChoices = {};
@@ -332,4 +345,8 @@ function getUserSocketID(username) {
     }
 
     console.log(`no player with username ${username}`);
+}
+
+function hash (s) {
+    return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);              
 }

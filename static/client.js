@@ -137,7 +137,6 @@ socket.on('givenChoiceApproved', () => {
 })
 
 socket.on('updatedWaitingFor', (waitingFor) => {
-    console.table(waitingFor);
     waitingForText.innerHTML = waitingFor.join(', ');
 })
 
@@ -165,9 +164,16 @@ socket.on('displayChoices', (choices => {
     });
 }))
 
-socket.on('displayResults', async (wrongChoices, answer, playerAnswers) => {
+socket.on('answerReceived', (waitingFor) => {
     hide(questionContainer);
+    hide(choicesContainer);
+
+    show(waitingForContainer, 'flex');
+})
+
+socket.on('displayResults', async (wrongChoices, answer, playerAnswers) => {
     hide(scoreBoardContainer);
+    hide(waitingForContainer);
     show(resultsContainer);
     show(resultsDiv);
 
