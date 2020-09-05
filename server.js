@@ -10,9 +10,11 @@ const server = http.Server(app);
 const io = socketIO(server);
 
 const triviaCategories = {
-    'mythology':'https://opentdb.com/api.php?amount=1&category=20&difficulty=hard&type=multiple&encode=base64',
-    'history':'https://opentdb.com/api.php?amount=1&category=23&difficulty=hard&type=multiple&encode=base64',
-    'celebrities':'https://opentdb.com/api.php?amount=1&category=26&type=multiple&encode=base64'
+    // 'mythology':'https://opentdb.com/api.php?amount=1&category=20&difficulty=hard&type=multiple&encode=base64',
+    // 'history':'https://opentdb.com/api.php?amount=1&category=23&difficulty=hard&type=multiple&encode=base64',
+    // 'celebrities':'https://opentdb.com/api.php?amount=1&category=26&type=multiple&encode=base64'
+    'generalKnowledge': 'https://opentdb.com/api.php?amount=1&category=9&type=multiple&difficulty=hard&encode=base64',
+    'animals': 'https://opentdb.com/api.php?amount=1&category=27&difficulty=hard&type=multiple&encode=base64'
 }
 
 const PORT = process.env.PORT || 5000;
