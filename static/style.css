@@ -69,7 +69,10 @@ body {
 .resultsContainer .choiceRow .choiceCard > button {
   min-width: 30%; }
 
-.resultsContainer .scoreBoard {
+.resultsContainer .roundScores {
+  display: none; }
+
+.scoreBoardContainer {
   display: none; }
 
 @keyframes fadeIn {

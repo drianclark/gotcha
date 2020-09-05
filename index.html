@@ -78,7 +78,9 @@
                         ></textarea>
                     </div>
 
-                    <div class="col-md-2 col-sm-12 text-left align-self-stretch pl-0">
+                    <div
+                        class="col-md-2 col-sm-12 text-left align-self-stretch pl-0"
+                    >
                         <button
                             type="button"
                             id="submitGivenChoice"
@@ -110,7 +112,26 @@
             <div class="resultsContainer container pt-5" id="resultsContainer">
                 <h2>Results</h2>
                 <div class="results mt-5" id="results"></div>
-                <div class="scoreBoard text-center mt-5" id="scoreBoard"></div>
+                <!-- <div
+                    class="roundScores text-center mt-5"
+                    id="roundScores"
+                ></div> -->
+            </div>
+
+            <div class="scoreBoardContainer container mt-5" id="scoreBoardContainer">
+                <div class="row">
+                    <div class="col-md-4 col-sm-12">
+                        <div class="card scoreBoard text-center" id="scoreBoard">
+                            <div class="card-body py-2">
+                                <h4 class="card-title mb-3">Scores</h4>
+                                <ul
+                                    class="scoresList list-group list-group-flush list-unstyled" id="scoresList"
+                                >
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </body>

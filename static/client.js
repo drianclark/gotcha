@@ -15,9 +15,10 @@ const submitGivenChoiceButton = document.getElementById("submitGivenChoice");
 const choicesContainer = document.getElementById("choicesContainer");
 const resultsContainer = document.getElementById("resultsContainer");
 const resultsDiv = document.getElementById("results");
-const scoreBoard = document.getElementById("scoreBoard");
 const waitingForContainer = document.getElementById("waitingForContainer");
 const waitingForText = document.getElementById("waitingFor");
+const scoreBoardContainer = document.getElementById("scoreBoardContainer");
+const scoresList = document.getElementById("scoresList");
 const logs = document.getElementById("logs");
 const logsBox = document.getElementById("logsBox");
 
@@ -43,11 +44,6 @@ submitGivenChoiceButton.addEventListener("click", () => {
     if (givenChoice.length != 0) {
         givenChoice = filterXSS(givenChoice.trim());
 
-        hide(questionContainer);
-        hide(madeUpChoiceForm);
-
-        show(waitingForContainer, 'flex');
-
         socket.emit('questionChoiceSubmitted', username, givenChoice);
     }
 
@@ -59,14 +55,13 @@ submitGivenChoiceButton.addEventListener("click", () => {
 usernameField.addEventListener("keyup", function(event) {
     // Number 13 is the "Enter" key on the keyboard
     if (event.keyCode === 13) {
-        console.log("enter pressed");
         // Cancel the default action, if needed
         event.preventDefault();
         usernameSubmit.click();
     }
 });
 
-userGivenChoiceField.addEventListener("keyup", function(event) {
+userGivenChoiceField.addEventListener("keydown", function(event) {
     // Number 13 is the "Enter" key on the keyboard
     if (event.keyCode === 13) {
         // Cancel the default action, if needed
@@ -80,8 +75,6 @@ socket.on('joinFail', (errorMessage) => {
 });
 
 socket.on('joinSuccess', () => {
-    console.log('join success!');
-
     hide(usernameForm);
     show(lobbyContainer);
     show(logs);
@@ -111,20 +104,36 @@ socket.on('hideLogs', () => {
     hide(logs);
 })
 
-socket.on('updateQuestion', (question) => {
+socket.on('initaliseRoundStart', (question, players) => {
     show(questionContainer);
     show(madeUpChoiceForm, 'flex');
     hide(lobbyContainer);
 
     let questionText = document.createElement("h5");
-
     questionText.appendChild(document.createTextNode(question));
-
     questionDiv.appendChild(questionText);
+
+    scoresList.innerHTML = '';
+    for (const [player, playerDetails] of Object.entries(players)) {
+        let playerScoreLI = document.createElement('li')
+        playerScoreLI.className = "list-group-item text-secondary py-1";
+        playerScoreLI.textContent = `${player}: ${playerDetails.score}`;
+
+        scoresList.appendChild(playerScoreLI);
+    }
+
+    show(scoreBoardContainer);
 })
 
 socket.on('givenChoiceError', (choice) => {
     alert(`Duplicate choice: ${choice}`);
+})
+
+socket.on('givenChoiceApproved', () => {
+    hide(questionContainer);
+    hide(madeUpChoiceForm);
+
+    show(waitingForContainer, 'flex');
 })
 
 socket.on('updatedWaitingFor', (waitingFor) => {
@@ -157,11 +166,8 @@ socket.on('displayChoices', (choices => {
 }))
 
 socket.on('displayResults', async (wrongChoices, answer, playerAnswers) => {
-    console.log(`got answer: ${answer}`);
-    console.log(`got wrongChoices: ${wrongChoices}`);
-    console.log(playerAnswers);
-
     hide(questionContainer);
+    hide(scoreBoardContainer);
     show(resultsContainer);
     show(resultsDiv);
 
@@ -169,30 +175,10 @@ socket.on('displayResults', async (wrongChoices, answer, playerAnswers) => {
 
     await sleep(3000);
 
-    hide(resultsDiv);
+    hide(resultsContainer);
 
     socket.emit('resultsShown', username);
 });
-
-socket.on('displayScores', async (players) => {
-    show(scoreBoard);
-    console.log('scoreboard shown');
-
-    for (const [player, playerDetails] of Object.entries(players)) {
-        let playerScoreRow = document.createElement('h5')
-        playerScoreRow.textContent = `${player}: ${playerDetails.score}`
-
-        scoreBoard.append(playerScoreRow);
-    }
-
-    await sleep(3000);
-
-    hide(scoreBoard);
-    console.log('scoreboard hidden');
-    hide(resultsContainer);
-
-    socket.emit('scoresShown', username);
-})
 
 socket.on('roundEnd', () => {
     // removing question text
@@ -206,9 +192,6 @@ socket.on('roundEnd', () => {
 
     // removing choices
     choicesContainer.innerHTML = '';
-
-    // removing scoreboard
-    scoreBoard.innerHTML = '';
 
     // signal cleanup done
     socket.emit('cleanupDone', username);
@@ -246,7 +229,6 @@ async function constructAndShowRoundResults(wrongChoices, answer, playerAnswers)
 
     // get players who answered correctly
     let ps = Object.keys(playerAnswers).filter(player => playerAnswers[player] === answer);
-    console.log('correct ' + ps);
 
     let playersCol = document.createElement('div');
     playersCol.className = 'col-6 playerAnswersCol';
@@ -276,7 +258,6 @@ async function constructAndShowRoundResults(wrongChoices, answer, playerAnswers)
 
         // get players who chose this choice
         let ps = Object.keys(playerAnswers).filter(player => playerAnswers[player] === choice);
-        console.log('wrong ' + ps);
 
         let playersCol = document.createElement('div');
         playersCol.className = 'col-6 playerAnswersCol';
@@ -290,7 +271,6 @@ async function constructAndShowRoundResults(wrongChoices, answer, playerAnswers)
         choiceCard.setAttribute('type', 'button');
         choiceCard.disabled = true;
         choiceCard.className = 'btn btn-outline-danger';
-        console.log('button should contain ' + choice);
         choiceCard.textContent = choice;
         choiceCardCol.appendChild(choiceCard);
 

@@ -28,8 +28,6 @@ server.listen(PORT, function() {
     console.log(`Starting server on port ${PORT}`);
 });
 
-// https://opentdb.com/api.php?amount=10&category=9&difficulty=hard&type=multiple
-
 var players = {};
 var adminQueue = [];
 var waitingFor = [];
@@ -115,15 +113,15 @@ io.on('connection', function(socket) {
     // after a fake answer choice has been submitted
     socket.on('questionChoiceSubmitted', (username, choice) => {
         // handle duplicate choice
+        let playerSocketID = getUserSocketID(username);
+
         if (Object.values(playerGivenChoices).includes(choice) || choice == answer) {
-            let playerSocketID = getUserSocketID(username);
             io.to(playerSocketID).emit('givenChoiceError', choice);
 
             return;
         }
 
-        console.log(choice)
-        console.log(Object.values(playerGivenChoices));
+        io.to(playerSocketID).emit('givenChoiceApproved', choice);
 
         playerGivenChoices[username] = choice;
 
@@ -205,18 +203,9 @@ io.on('connection', function(socket) {
 
         if (waitingFor.length == 0) {
             fillWaitingFor();
-            io.sockets.emit('displayScores', players);
+            io.sockets.emit('updateScores', players);
+            io.sockets.emit('roundEnd', players);
         }
-    });
-
-    socket.on('scoresShown', (username) => {
-        removeFromWaitingFor(username);
-
-        if (waitingFor.length == 0) {
-            fillWaitingFor();
-            io.sockets.emit('roundEnd');
-        }
-
     });
 
     // after clients are done cleaning up
@@ -278,7 +267,7 @@ async function startNewRound() {
     fillWaitingFor();
 
     io.sockets.emit('hideLogs');
-    io.sockets.emit('updateQuestion', question);
+    io.sockets.emit('initaliseRoundStart', question, players);
 }
 
 async function getRandomQuestion() {

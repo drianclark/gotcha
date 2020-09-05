@@ -72,7 +72,6 @@ body {
     height: 100vh;
 }
 
-
 .resultsContainer {
     display: none;
     
@@ -94,9 +93,13 @@ body {
         }
     }
 
-    .scoreBoard {
+    .roundScores {
         display: none;
     }
+}
+
+.scoreBoardContainer {
+    display: none;
 }
 
 
