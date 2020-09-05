@@ -59,9 +59,19 @@ submitGivenChoiceButton.addEventListener("click", () => {
 usernameField.addEventListener("keyup", function(event) {
     // Number 13 is the "Enter" key on the keyboard
     if (event.keyCode === 13) {
+        console.log("enter pressed");
         // Cancel the default action, if needed
         event.preventDefault();
-        document.getElementById("usernameSubmit").click();
+        usernameSubmit.click();
+    }
+});
+
+userGivenChoiceField.addEventListener("keyup", function(event) {
+    // Number 13 is the "Enter" key on the keyboard
+    if (event.keyCode === 13) {
+        // Cancel the default action, if needed
+        event.preventDefault();
+        submitGivenChoiceButton.click();
     }
 });
 
@@ -111,6 +121,10 @@ socket.on('updateQuestion', (question) => {
     questionText.appendChild(document.createTextNode(question));
 
     questionDiv.appendChild(questionText);
+})
+
+socket.on('givenChoiceError', (choice) => {
+    alert(`Duplicate choice: ${choice}`);
 })
 
 socket.on('updatedWaitingFor', (waitingFor) => {

@@ -40,8 +40,7 @@ body {
   display: none; }
 
 .questionContainer .madeUpChoiceForm textarea {
-  max-width: 60%;
-  min-width: 600px; }
+  max-width: 700px; }
 
 .choicesContainer {
   display: none; }

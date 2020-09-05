@@ -4,7 +4,7 @@
   "description": "psych but in the browser",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js & (cd static && npx node-sass --watch -q . -o .)"
   },
   "author": "Adrian David",
   "license": "MIT",

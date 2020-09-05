@@ -114,6 +114,17 @@ io.on('connection', function(socket) {
 
     // after a fake answer choice has been submitted
     socket.on('questionChoiceSubmitted', (username, choice) => {
+        // handle duplicate choice
+        if (Object.values(playerGivenChoices).includes(choice) || choice == answer) {
+            let playerSocketID = getUserSocketID(username);
+            io.to(playerSocketID).emit('givenChoiceError', choice);
+
+            return;
+        }
+
+        console.log(choice)
+        console.log(Object.values(playerGivenChoices));
+
         playerGivenChoices[username] = choice;
 
         // remove player from waitingFor array
@@ -262,7 +273,7 @@ async function startNewRound() {
     category = Buffer.from(questionObject.category, 'base64').toString();
 
     playerAnswers = {};
-    playerGivenChoices = [];
+    playerGivenChoices = {};
 
     fillWaitingFor();
 
@@ -324,4 +335,12 @@ function givePoint(player) {
 
 function fillWaitingFor() {
     waitingFor = Object.keys(players);
+}
+
+function getUserSocketID(username) {
+    for (const [player, playerDetails] of Object.entries(players)) {
+        if (player == username) return playerDetails.socketID;
+    }
+
+    console.log(`no player with username ${username}`);
 }
