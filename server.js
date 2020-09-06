@@ -139,7 +139,7 @@ io.on('connection', function(socket) {
 
         // remove player from waitingFor array
         removeFromWaitingFor(username);
-        socket.emit('updatedWaitingFor', waitingFor);
+        io.sockets.emit('updatedWaitingFor', waitingFor);
 
         if (waitingFor.length == 0) {
             console.log(Object.values(playerGivenChoices));
@@ -186,7 +186,7 @@ io.on('connection', function(socket) {
         removeFromWaitingFor(username);
 
         // updates waiting for in all clients
-        socket.emit('updatedWaitingFor', waitingFor);
+        io.sockets.emit('updatedWaitingFor', waitingFor);
         // displays waiting for
         io.to(playerSocketID).emit('answerReceived', waitingFor);
 

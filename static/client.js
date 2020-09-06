@@ -106,7 +106,7 @@ socket.on('showStartButton', () => {
 
 socket.on('hideStartButton', () => {
     hide(startGameButton);
-})
+});
 
 socket.on('hideLogs', () => {
     hide(logs);
