@@ -29,19 +29,6 @@ const notificationsContainer = document.getElementById("notificationsContainer")
 const logs = document.getElementById("logs");
 const logsBox = document.getElementById("logsBox") as HTMLInputElement;
 
-interface playerDetails {
-    socketID: string;
-    score: number;
-}
-
-interface players {
-    [username: string]: playerDetails
-}
-
-interface playerAnswers {
-    [username: string]: string;
-}
-
 usernameSubmit.addEventListener("click", () => {
     if (usernameField.value.length != 0) {
         username = filterXSS(usernameField.value);

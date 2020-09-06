@@ -46,7 +46,7 @@ interface playerDetails {
 }
 
 interface players {
-    [username: string]: playerDetails
+    [username: string]: playerDetails;
 }
 
 interface playerChoices {
