@@ -241,6 +241,18 @@ socket.on('log', (message) => {
     log(message);
 })
 
+socket.on('insufficientPlayers', () => {
+    alert('Not enough players left to play');
+});
+
+socket.on('returnToLobby', () => {
+    hide(questionContainer);
+    hide(waitingForContainer);
+    hide(resultsContainer);
+    hide(bottomContainer);
+    show(lobbyContainer);
+});
+
 function log(message) {
     logsBox.value += message + '\r\n';
     logsBox.scrollTop = logsBox.scrollHeight;

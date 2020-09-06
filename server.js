@@ -40,7 +40,7 @@ server.listen(PORT, function() {
 
 var askedQuestions = {};
 var players = {};
-var adminQueue = [];
+var playerQueue = [];
 var waitingFor = [];
 var playerGivenChoices = {};
 var question;
@@ -48,6 +48,7 @@ var category;
 var answer;
 var playerAnswers = {};
 var skipVotes = [];
+var gameInProgress = false;
 
 
 // Add the WebSocket handlers
@@ -64,6 +65,7 @@ io.on('connection', function(socket) {
         }
 
         io.to(socket.id).emit('joinSuccess');
+        socket.join('gameRoom');
 
         players[username] = {
             score: 0,
@@ -73,7 +75,7 @@ io.on('connection', function(socket) {
         console.log(username + ' has joined!');
         logForAll(username + ' has joined!');
 
-        adminQueue.push(socket.id);
+        playerQueue.push(socket.id);
         
         updatePlayers();
 
@@ -87,14 +89,18 @@ io.on('connection', function(socket) {
 
     // on quit
     socket.on('disconnect', () => {
-        let userQuit;
 
         for (const [player, playerDetails] of Object.entries(players)) {
             if (playerDetails.socketID == socket.id) {
-                userQuit = player;
+                var userQuit = player;
 
                 try {
-                    removeFromAdminQueue(playerDetails.socketID);
+                    removeFromPlayerQueue(playerDetails.socketID);
+
+                    for (const s of playerQueue) {
+                        io.to(s).emit('log', `${userQuit} has quit`);
+                    }
+
                 } catch (e) {
                     console.log(e);
                 }
@@ -107,7 +113,13 @@ io.on('connection', function(socket) {
         console.log(userQuit + ' has quit');
 
         if (Object.keys(players).length < 2) {
-            hideStartButtonToAdmin();
+            if (!gameInProgress) hideStartButtonToAdmin();
+
+            else {
+                gameInProgress = false;
+                io.to('gameRoom').emit('insufficientPlayers');
+                io.to('gameRoom').emit('returnToLobby');
+            }
         }
         
         console.log(Object.keys(players));
@@ -116,6 +128,7 @@ io.on('connection', function(socket) {
 
     // start round
     socket.on('startRound', async () => {
+        gameInProgress = true;
         startNewRound();
 
         fillWaitingFor();
@@ -139,7 +152,7 @@ io.on('connection', function(socket) {
 
         // remove player from waitingFor array
         removeFromWaitingFor(username);
-        io.sockets.emit('updatedWaitingFor', waitingFor);
+        io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
 
         if (waitingFor.length == 0) {
             console.log(Object.values(playerGivenChoices));
@@ -155,7 +168,7 @@ io.on('connection', function(socket) {
             // shuffling order of choices
             shuffle(choices);
             
-            io.sockets.emit('displayChoices', choices);
+            io.to('gameRoom').emit('displayChoices', choices);
 
             // filling waitingFor again
             fillWaitingFor();
@@ -168,12 +181,12 @@ io.on('connection', function(socket) {
         // add user to array of skipVotes
         skipVotes.push(username)
 
-        io.sockets.emit('skipVoteReceived', username);
+        io.to('gameRoom').emit('skipVoteReceived', username);
 
         // check all players voted to skip
         if (allPlayersVotedToSkip()) {
             skipVotes = [];
-            io.sockets.emit('roundEnd');
+            io.to('gameRoom').emit('roundEnd');
         }
     })
 
@@ -186,7 +199,7 @@ io.on('connection', function(socket) {
         removeFromWaitingFor(username);
 
         // updates waiting for in all clients
-        io.sockets.emit('updatedWaitingFor', waitingFor);
+        io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
         // displays waiting for
         io.to(playerSocketID).emit('answerReceived', waitingFor);
 
@@ -220,7 +233,7 @@ io.on('connection', function(socket) {
             let wrongChoices = Object.values(playerGivenChoices).filter(e => { return e !== answer });
 
             // show results
-            io.sockets.emit('displayResults', wrongChoices, answer, playerAnswers);
+            io.to('gameRoom').emit('displayResults', wrongChoices, answer, playerAnswers);
 
             // after showing results, the clients emit resultsShown
         }
@@ -232,8 +245,8 @@ io.on('connection', function(socket) {
 
         if (waitingFor.length == 0) {
             fillWaitingFor();
-            io.sockets.emit('updateScores', players);
-            io.sockets.emit('roundEnd', players);
+            io.to('gameRoom').emit('updateScores', players);
+            io.to('gameRoom').emit('roundEnd', players);
         }
     });
 
@@ -252,12 +265,12 @@ io.on('connection', function(socket) {
 // socket.on only responds to the one socket that emitted something
 
 function updatePlayers() {
-    io.sockets.emit('playersList', Object.keys(players));
+    io.to('gameRoom').emit('playersList', Object.keys(players));
 }
 
 function showStartButtonToAdmin() {
     try {
-        admin = adminQueue[0];
+        admin = playerQueue[0];
         io.to(admin).emit('showStartButton');
     } catch (e) {
     console.log(e);
@@ -265,14 +278,14 @@ function showStartButtonToAdmin() {
 }
 
 function hideStartButtonToAdmin() {
-    admin = adminQueue[0];
+    admin = playerQueue[0];
     io.to(admin).emit('hideStartButton')
 }
 
-function removeFromAdminQueue(id) {
-    const index = adminQueue.indexOf(id);
+function removeFromPlayerQueue(id) {
+    const index = playerQueue.indexOf(id);
     if (index > -1) {
-        adminQueue.splice(index, 1);
+        playerQueue.splice(index, 1);
     }
 }
 
@@ -302,8 +315,8 @@ async function startNewRound() {
 
     fillWaitingFor();
 
-    io.sockets.emit('hideLogs');
-    io.sockets.emit('initaliseRoundStart', question, category, players);
+    io.to('gameRoom').emit('hideLogs');
+    io.to('gameRoom').emit('initaliseRoundStart', question, category, players);
 }
 
 async function getRandomQuestion() {
@@ -331,7 +344,7 @@ function shuffle(a) {
 }
  
 function logForAll(message) {
-    io.sockets.emit('log', message);
+    io.to('gameRoom').emit('log', message);
 }
 
 function removePeriod(s) {
@@ -339,7 +352,7 @@ function removePeriod(s) {
         return s.slice(0,-1);
     }
 
-    return s
+    return s;
 }
 
 function getPlayerWhoSubmittedFakeAnswer(answer) {
@@ -380,4 +393,4 @@ function allPlayersVotedToSkip(){
     }
 
     return true;
-}
+};
