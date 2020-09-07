@@ -69,7 +69,7 @@ server.listen(PORT, function () {
 });
 var askedQuestions = {};
 var players = {};
-var playerQueue;
+var playerQueue = [];
 var waitingFor;
 var playerGivenChoices = {};
 var question;
