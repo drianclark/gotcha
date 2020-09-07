@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "concurrently \"nodemon server.js\" \"npx node-sass --watch -q static -o static\"",
     "test": "concurrently \"node server.js\" \"jest\""
-    
   },
   "author": "Adrian David",
   "license": "MIT",
@@ -20,6 +19,7 @@
     "@types/node": "^14.6.4",
     "@types/socket.io": "^2.1.11",
     "concurrently": "^5.3.0",
+    "expect-puppeteer": "^4.4.0",
     "jest": "^26.4.2",
     "jest-puppeteer": "^4.4.0",
     "node-sass": "^4.14.1",

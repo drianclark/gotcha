@@ -2,7 +2,8 @@
 // https://jestjs.io/docs/en/configuration.html
 
 module.exports = {
-  "preset": "jest-puppeteer"
+  preset: "jest-puppeteer",
+  setupFilesAfterEnv: ["expect-puppeteer"]
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
