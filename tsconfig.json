@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "watch": true,
+        "lib": ["dom", "es2019"],
+        "module": "commonjs"
+    },
+
+    "files": [
+        "server.ts",
+        "static/client.ts"
+    ]
+}

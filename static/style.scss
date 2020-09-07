@@ -54,9 +54,24 @@ body {
 
     .madeUpChoiceForm {
         textarea {
-            max-width: 60%;
-            min-width: 600px;
+            max-width: 700px;
         }
+    }
+
+
+    .skipQuestionRow {
+        .skipQuestionButton {
+            white-space: normal;
+
+            .skipQuestionSpinner {
+                display: none;
+            }
+
+            .skipQuestionCheck {
+                display: none;
+            }
+        }
+        
     }
 }
 
@@ -72,7 +87,6 @@ body {
     display: none !important;
     height: 100vh;
 }
-
 
 .resultsContainer {
     display: none;
@@ -95,9 +109,13 @@ body {
         }
     }
 
-    .scoreBoard {
+    .roundScores {
         display: none;
     }
+}
+
+.bottomContainer {
+    display: none;
 }
 
 

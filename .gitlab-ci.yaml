@@ -1,0 +1,11 @@
+image: node:latest
+
+cache:
+    paths:
+        - node_modules/
+
+test_e2e:
+    only: core-testing
+    script:
+        - npm install
+        - npm run test
