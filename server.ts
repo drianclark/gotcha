@@ -59,7 +59,6 @@ interface playerAnswers {
 
 var askedQuestions = {};
 var players: players = {};
-
 var playerQueue: socketID[] = [];
 var waitingFor: string[];
 var playerGivenChoices: playerChoices = {};
