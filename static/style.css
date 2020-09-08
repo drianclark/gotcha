@@ -4,6 +4,10 @@ body {
 .rootContainer {
   height: 100vh; }
 
+@media (max-width: 992px) {
+  .rootContainer {
+    height: 90vh; } }
+
 .usernameForm {
   height: 100vh;
   margin-top: -5em; }
@@ -14,10 +18,28 @@ body {
   font-size: 10em;
   margin-bottom: 0.2em; }
 
-.usernameForm #usernameField {
+.usernameForm .usernameField {
   text-align: center;
   max-width: 40%;
   min-width: 300px; }
+
+@media (max-width: 992px) {
+  .usernameForm {
+    height: 90vh; }
+  .usernameForm h1 {
+    font-size: 20vw; }
+  .usernameForm .usernameField {
+    text-align: center;
+    min-width: 70%;
+    max-width: 70%;
+    padding: 2vh 0;
+    margin-bottom: 2vh;
+    font-size: 2em; }
+  .usernameForm .usernameSubmit {
+    min-width: 70%;
+    max-width: 70%;
+    padding: 1vh 0;
+    font-size: 2em; } }
 
 .lobbyContainer {
   display: none; }
@@ -34,7 +56,20 @@ body {
   display: none; }
 
 .lobbyContainer .logs > .logsBox {
-  width: 100%; }
+  width: 100%;
+  background-color: transparent; }
+
+@media (max-width: 992px) {
+  .lobbyContainer {
+    margin-top: 8vh !important; }
+  .lobbyContainer h2 {
+    font-size: 5em; }
+  .lobbyContainer ul {
+    font-size: 3em;
+    padding-left: 10vw; }
+  .lobbyContainer .logsBox {
+    margin-top: 20vh;
+    font-size: 2em; } }
 
 .questionContainer {
   display: none; }
