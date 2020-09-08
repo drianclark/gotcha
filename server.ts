@@ -341,7 +341,7 @@ async function startNewRound() {
 
 async function getRandomQuestion() {
     var url = getRandomProperty(triviaCategories);
-    let res = await fetch(url);
+    let res = await request(url);
     let questionObject = await res.json();
 
     return questionObject.results[0];

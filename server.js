@@ -308,7 +308,7 @@ function getRandomQuestion() {
             switch (_a.label) {
                 case 0:
                     url = getRandomProperty(triviaCategories);
-                    return [4 /*yield*/, fetch(url)];
+                    return [4 /*yield*/, request(url)];
                 case 1:
                     res = _a.sent();
                     return [4 /*yield*/, res.json()];
