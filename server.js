@@ -1,26 +1,3 @@
-<<<<<<< HEAD
-const express = require('express');
-const fetch = require('node-fetch');
-const http = require('http');
-const path = require('path');
-const socketIO = require('socket.io');
-
-const app = express();
-const server = http.Server(app);
-const io = socketIO(server);
-
-const triviaCategories = {
-    // 'mythology':'https://opentdb.com/api.php?amount=1&category=20&difficulty=hard&type=multiple&encode=base64',
-    // 'history':'https://opentdb.com/api.php?amount=1&category=23&difficulty=hard&type=multiple&encode=base64',
-    // 'celebrities':'https://opentdb.com/api.php?amount=1&category=26&type=multiple&encode=base64'
-    'generalKnowledge': 'https://opentdb.com/api.php?amount=1&category=9&type=multiple&difficulty=hard&encode=base64',
-    'animals': 'https://opentdb.com/api.php?amount=1&category=27&difficulty=hard&type=multiple&encode=base64'
-}
-
-var askedQuestions = [];
-
-const PORT = process.env.PORT || 5000;
-=======
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -67,7 +44,6 @@ var server = http.Server(app);
 var io = socketIO(server);
 var triviaCategories;
 var PORT = process.env.PORT || 5000;
->>>>>>> 881f85f667aae85d048d7fd5cfab1c6014ed4257
 app.set('port', PORT);
 app.use('/static', express.static(__dirname + '/static'));
 if (PORT === 5000) {
@@ -79,8 +55,11 @@ if (PORT === 5000) {
 }
 else {
     triviaCategories = {
-        'animals': 'https://opentdb.com/api.php?amount=1&category=27&difficulty=hard&type=multiple&encode=base64',
-        'generalKnowledge': 'https://opentdb.com/api.php?amount=1&category=9&difficulty=hard&type=multiple&encode=base64'
+        'animals': 'https://opentdb.com/api.php?amount=1&category=27&type=multiple&encode=base64',
+        'generalKnowledge': 'https://opentdb.com/api.php?amount=1&category=9&type=multiple&encode=base64',
+        'science&Nature': 'https://opentdb.com/api.php?amount=1&category=17&type=multiple&encode=base64',
+        'books': 'https://opentdb.com/api.php?amount=1&category=10&type=multiple&encode=base64',
+        'comics': 'https://opentdb.com/api.php?amount=1&category=29&type=multiple&encode=base64'
     };
 }
 // Routing
@@ -293,33 +272,6 @@ function removeFromWaitingFor(username) {
         waitingFor.splice(index, 1);
     }
 }
-<<<<<<< HEAD
-
-async function startNewRound() {
-    let questionObject = await getRandomQuestion();
-    question = Buffer.from(questionObject.question, 'base64').toString();
-    answer = Buffer.from(questionObject.correct_answer, 'base64').toString();
-    answer = removePeriod(answer.toLowerCase());
-    category = Buffer.from(questionObject.category, 'base64').toString();
-
-    while (answer == undefined || hash(answer) in askedQuestions) {
-        let questionObject = await getRandomQuestion();
-        question = Buffer.from(questionObject.question, 'base64').toString();
-        answer = Buffer.from(questionObject.correct_answer, 'base64').toString();
-        answer = removePeriod(answer.toLowerCase());
-        category = Buffer.from(questionObject.category, 'base64').toString();
-    }
-    
-    askedQuestions[hash(answer)] = 1;
-
-    playerAnswers = {};
-    playerGivenChoices = [];
-
-    fillWaitingFor();
-
-    io.sockets.emit('hideLogs');
-    io.sockets.emit('updateQuestion', question);
-=======
 function startNewRound() {
     return __awaiter(this, void 0, void 0, function () {
         var questionObject;
@@ -348,7 +300,6 @@ function startNewRound() {
             }
         });
     });
->>>>>>> 881f85f667aae85d048d7fd5cfab1c6014ed4257
 }
 function getRandomQuestion() {
     return __awaiter(this, void 0, void 0, function () {
@@ -411,12 +362,6 @@ function givePoint(player) {
 function fillWaitingFor() {
     waitingFor = Object.keys(players);
 }
-<<<<<<< HEAD
-
-function hash(s) {
-    return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);              
-}
-=======
 function hash(s) {
     return s.split("").reduce(function (a, b) { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0);
 }
@@ -435,4 +380,3 @@ function allPlayersVotedToSkip() {
     return true;
 }
 ;
->>>>>>> 881f85f667aae85d048d7fd5cfab1c6014ed4257

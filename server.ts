@@ -23,8 +23,11 @@ if (PORT === 5000) {
 
 else {
     triviaCategories = {
-        'animals':'https://opentdb.com/api.php?amount=1&category=27&difficulty=hard&type=multiple&encode=base64',
-        'generalKnowledge':'https://opentdb.com/api.php?amount=1&category=9&difficulty=hard&type=multiple&encode=base64'
+        'animals':'https://opentdb.com/api.php?amount=1&category=27&type=multiple&encode=base64',
+        'generalKnowledge':'https://opentdb.com/api.php?amount=1&category=9&type=multiple&encode=base64',
+        'science&Nature':'https://opentdb.com/api.php?amount=1&category=17&type=multiple&encode=base64',
+        'books':'https://opentdb.com/api.php?amount=1&category=10&type=multiple&encode=base64',
+        'comics':'https://opentdb.com/api.php?amount=1&category=29&type=multiple&encode=base64'
     }
 }
 
