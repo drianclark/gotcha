@@ -42,7 +42,9 @@ var socketIO = require('socket.io');
 var app = express();
 var server = http.Server(app);
 var io = socketIO(server);
+var sqlite3 = require('sqlite3').verbose();
 var triviaCategories;
+var questions;
 var PORT = process.env.PORT || 5000;
 app.set('port', PORT);
 app.use('/static', express.static(__dirname + '/static'));
@@ -143,7 +145,28 @@ io.on('connection', function (socket) {
     });
     // start round
     socket.on('startRound', function () { return __awaiter(_this, void 0, void 0, function () {
+        var db_1, query_1;
         return __generator(this, function (_a) {
+            if (!gameInProgress) {
+                db_1 = new sqlite3.Database('./db/gotcha.db', function (err) {
+                    if (err) {
+                        console.error(err.message);
+                    }
+                    console.log('Connected to the gotcha database.');
+                });
+                query_1 = "SELECT * FROM questions ORDER BY random() LIMIT 100;";
+                db_1.serialize(function () {
+                    db_1.all(query_1, [], function (err, rows) {
+                        if (err) {
+                            throw err;
+                            db_1.close();
+                        }
+                        console.log('Successfully fetched data');
+                        questions = rows;
+                        db_1.close();
+                    });
+                });
+            }
             gameInProgress = true;
             startNewRound();
             fillWaitingFor();
@@ -238,6 +261,8 @@ io.on('connection', function (socket) {
     socket.on('cleanupDone', function (username) {
         removeFromWaitingFor(username);
         if (waitingFor.length == 0) {
+            // remove the current question
+            questions.shift();
             startNewRound();
         }
     });
@@ -276,54 +301,20 @@ function startNewRound() {
     return __awaiter(this, void 0, void 0, function () {
         var questionObject;
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, getRandomQuestion()];
-                case 1:
-                    questionObject = _a.sent();
-                    question = Buffer.from(questionObject.question, 'base64').toString();
-                    answer = Buffer.from(questionObject.correct_answer, 'base64').toString();
-                    answer = removePeriod(answer.toLowerCase());
-                    category = Buffer.from(questionObject.category, 'base64').toString();
-                    _a.label = 2;
-                case 2:
-                    if (askedQuestions[hash(answer)] != undefined || answer == undefined) return [3 /*break*/, 0];
-                    _a.label = 3;
-                case 3:
-                    // once we've seen a new question, mark it as already seen
-                    askedQuestions[hash(answer)] = 1;
-                    playerAnswers = {};
-                    playerGivenChoices = {};
-                    fillWaitingFor();
-                    io.to('gameRoom').emit('hideLogs');
-                    io.to('gameRoom').emit('initaliseRoundStart', question, category, players);
-                    return [2 /*return*/];
-            }
+            questionObject = questions[0];
+            question = removePeriod(questionObject.question);
+            answer = questionObject.answer.trim().toLowerCase();
+            category = questionObject.category;
+            console.log(answer);
+            playerAnswers = {};
+            playerGivenChoices = {};
+            fillWaitingFor();
+            io.to('gameRoom').emit('hideLogs');
+            io.to('gameRoom').emit('initaliseRoundStart', question, category, players);
+            return [2 /*return*/];
         });
     });
 }
-function getRandomQuestion() {
-    return __awaiter(this, void 0, void 0, function () {
-        var url, res, questionObject;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    url = getRandomProperty(triviaCategories);
-                    return [4 /*yield*/, request(url)];
-                case 1:
-                    res = _a.sent();
-                    return [4 /*yield*/, res.json()];
-                case 2:
-                    questionObject = _a.sent();
-                    return [2 /*return*/, questionObject.results[0]];
-            }
-        });
-    });
-}
-function getRandomProperty(obj) {
-    var keys = Object.keys(obj);
-    return obj[keys[keys.length * Math.random() << 0]];
-}
-;
 function shuffle(a) {
     var j, x, i;
     for (i = a.length - 1; i > 0; i--) {

@@ -7,7 +7,11 @@ const socketIO = require('socket.io');
 const app = express();
 const server = http.Server(app);
 const io = socketIO(server);
-var triviaCategories;
+
+const sqlite3 = require('sqlite3').verbose();
+
+var triviaCategories: Object;
+var questions: questionObject[];
 
 const PORT = process.env.PORT || 5000;
 app.set('port', PORT);
@@ -58,6 +62,14 @@ interface playerChoices {
 
 interface playerAnswers {
     [username: string]: string;
+}
+
+
+interface questionObject {
+    question: string;
+    answer: string;
+    category: string;
+    id: number;
 }
 
 var askedQuestions = {};
@@ -150,6 +162,27 @@ io.on('connection', function(socket: SocketIO.Socket) {
 
     // start round
     socket.on('startRound', async () => {
+        if (!gameInProgress) {
+            let db = new sqlite3.Database('./db/gotcha.db', (err) => {
+                if (err) {
+                    console.error(err.message);
+                }
+            });
+
+            let query:string = `SELECT * FROM questions ORDER BY random() LIMIT 100;`
+
+            db.serialize(function() {
+                db.all(query, [], (err, rows) => {
+                    if (err) {
+                        throw err;
+                        db.close();
+                    }
+                    questions = rows;
+                    db.close();
+                });
+            });
+        }
+
         gameInProgress = true;
         startNewRound();
 
@@ -275,6 +308,8 @@ io.on('connection', function(socket: SocketIO.Socket) {
         removeFromWaitingFor(username);
 
         if (waitingFor.length == 0) {
+            // remove the current question
+            questions.shift();
             startNewRound();
         }
     })
@@ -317,18 +352,10 @@ function removeFromWaitingFor(username: string) {
 }
 
 async function startNewRound() {
-    do {
-        let questionObject = await getRandomQuestion();
-        question = Buffer.from(questionObject.question, 'base64').toString();
-        answer = Buffer.from(questionObject.correct_answer, 'base64').toString();
-        answer = removePeriod(answer.toLowerCase());
-        category = Buffer.from(questionObject.category, 'base64').toString();
-    
-        // keep fetching questions if the current question has already been asked or is undefined
-    } while (askedQuestions[hash(answer)] != undefined || answer == undefined);
-    
-    // once we've seen a new question, mark it as already seen
-    askedQuestions[hash(answer)] = 1;
+    let questionObject = questions[0];
+    question = removePeriod(questionObject.question);
+    answer = questionObject.answer.trim().toLowerCase();
+    category = questionObject.category;
 
     playerAnswers = {};
     playerGivenChoices = {};
@@ -338,19 +365,6 @@ async function startNewRound() {
     io.to('gameRoom').emit('hideLogs');
     io.to('gameRoom').emit('initaliseRoundStart', question, category, players);
 }
-
-async function getRandomQuestion() {
-    var url = getRandomProperty(triviaCategories);
-    let res = await request(url);
-    let questionObject = await res.json();
-
-    return questionObject.results[0];
-}
-
-function getRandomProperty(obj: Object) {
-    var keys = Object.keys(obj);
-    return obj[keys[ keys.length * Math.random() << 0]];
-};
 
 function shuffle(a: any[]) {
     var j, x, i;
