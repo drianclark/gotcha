@@ -17,6 +17,7 @@ test('login fail on empty username field', async () => {
         await expect(page).toClick('#usernameSubmit');
     });
 
+    expect(dialog._message).toBe('Invalid username');
     await dialog.dismiss();
 });
 
@@ -38,6 +39,6 @@ test('login success on valid username', async () => {
         await expect(page2).toClick('#usernameSubmit');
     });
 
-    await dialog.dismiss();
     expect(dialog._message).toBe('Username already exists');
+    await dialog.dismiss();
 });

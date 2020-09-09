@@ -1,11 +1,10 @@
-image: node:latest
+image: monomial123/puppeteer-ps:0.1
 
 cache:
     paths:
         - node_modules/
 
 test_e2e:
-    only: core-testing
     script:
         - npm install
         - npm run test
