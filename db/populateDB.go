@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -49,7 +50,7 @@ func main() {
 		}
 
 		question := trivia[0]
-		answer := trivia[1]
+		answer := strings.TrimSpace(strings.ToLower(trivia[1]))
 
 		_, err = stmt.Exec(question, answer)
 		if err != nil {
