@@ -1,11 +1,12 @@
 declare var filterXSS:any;
+declare var io:any;
 
 const socket = io();
 var username: string;
 
 const lobbyContainer = document.getElementById('lobbyContainer');
 const lobbyPlayersList = document.getElementById('lobbyPlayersList');
-const usernameForm =document.getElementById('usernameForm');
+const usernameForm = document.getElementById('usernameForm');
 const usernameField = document.getElementById('usernameField') as HTMLInputElement;
 const usernameSubmit = document.getElementById('usernameSubmit')
 const startGameButton = document.getElementById('startGameButton');
@@ -28,6 +29,31 @@ const scoresList = document.getElementById("scoresList");
 const notificationsContainer = document.getElementById("notificationsContainer");
 const logs = document.getElementById("logs");
 const logsBox = document.getElementById("logsBox") as HTMLInputElement;
+
+interface playerDetails {
+    socketID: string;
+    score: number;
+}
+
+interface players {
+    [username: string]: playerDetails;
+}
+
+interface playerChoices {
+    [username: string]: string;
+}
+
+interface playerAnswers {
+    [username: string]: string;
+}
+
+
+interface questionObject {
+    question: string;
+    answer: string;
+    category: string;
+    id: number;
+}
 
 usernameSubmit.addEventListener("click", () => {
     if (usernameField.value.length != 0) {

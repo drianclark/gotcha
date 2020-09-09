@@ -1,3 +1,5 @@
+import { dir } from "console";
+
 const express = require('express');
 const request = require('node-fetch');
 const http = require('http');
@@ -9,6 +11,7 @@ const server = http.Server(app);
 const io = socketIO(server);
 
 const sqlite3 = require('sqlite3').verbose();
+const sqlite = require('sqlite')
 
 var triviaCategories: Object;
 var questions: questionObject[];
@@ -163,24 +166,15 @@ io.on('connection', function(socket: SocketIO.Socket) {
     // start round
     socket.on('startRound', async () => {
         if (!gameInProgress) {
-            let db = new sqlite3.Database('./db/gotcha.db', (err) => {
-                if (err) {
-                    console.error(err.message);
-                }
+            const db = await sqlite.open({
+                    filename: './db/gotcha.db',
+                    driver: sqlite3.Database
             });
 
-            let query:string = `SELECT * FROM questions ORDER BY random() LIMIT 100;`
+            let query:string = `SELECT * FROM questions ORDER BY random() LIMIT 100;`;
 
-            db.serialize(function() {
-                db.all(query, [], (err, rows) => {
-                    if (err) {
-                        throw err;
-                        db.close();
-                    }
-                    questions = rows;
-                    db.close();
-                });
-            });
+            questions = await db.all(query);
+            db.close();
         }
 
         gameInProgress = true;

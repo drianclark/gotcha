@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,6 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+exports.__esModule = true;
 var express = require('express');
 var request = require('node-fetch');
 var http = require('http');
@@ -43,6 +45,7 @@ var app = express();
 var server = http.Server(app);
 var io = socketIO(server);
 var sqlite3 = require('sqlite3').verbose();
+var sqlite = require('sqlite');
 var triviaCategories;
 var questions;
 var PORT = process.env.PORT || 5000;
@@ -145,32 +148,29 @@ io.on('connection', function (socket) {
     });
     // start round
     socket.on('startRound', function () { return __awaiter(_this, void 0, void 0, function () {
-        var db_1, query_1;
+        var db, query;
         return __generator(this, function (_a) {
-            if (!gameInProgress) {
-                db_1 = new sqlite3.Database('./db/gotcha.db', function (err) {
-                    if (err) {
-                        console.error(err.message);
-                    }
-                    console.log('Connected to the gotcha database.');
-                });
-                query_1 = "SELECT * FROM questions ORDER BY random() LIMIT 100;";
-                db_1.serialize(function () {
-                    db_1.all(query_1, [], function (err, rows) {
-                        if (err) {
-                            throw err;
-                            db_1.close();
-                        }
-                        console.log('Successfully fetched data');
-                        questions = rows;
-                        db_1.close();
-                    });
-                });
+            switch (_a.label) {
+                case 0:
+                    if (!!gameInProgress) return [3 /*break*/, 3];
+                    return [4 /*yield*/, sqlite.open({
+                            filename: './db/gotcha.db',
+                            driver: sqlite3.Database
+                        })];
+                case 1:
+                    db = _a.sent();
+                    query = "SELECT * FROM questions ORDER BY random() LIMIT 100;";
+                    return [4 /*yield*/, db.all(query)];
+                case 2:
+                    questions = _a.sent();
+                    db.close();
+                    _a.label = 3;
+                case 3:
+                    gameInProgress = true;
+                    startNewRound();
+                    fillWaitingFor();
+                    return [2 /*return*/];
             }
-            gameInProgress = true;
-            startNewRound();
-            fillWaitingFor();
-            return [2 /*return*/];
         });
     }); });
     // after a fake answer choice has been submitted
@@ -305,7 +305,6 @@ function startNewRound() {
             question = removePeriod(questionObject.question);
             answer = questionObject.answer.trim().toLowerCase();
             category = questionObject.category;
-            console.log(answer);
             playerAnswers = {};
             playerGivenChoices = {};
             fillWaitingFor();
