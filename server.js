@@ -58,10 +58,41 @@ app.get('/', function (request, response) {
 server.listen(PORT, function () {
     console.log("Starting server on port " + PORT);
 });
+var Timer = /** @class */ (function () {
+    function Timer(duration) {
+        this.duration = duration;
+        this.timeLeft = duration;
+        console.log(this.timeLeft);
+    }
+    Timer.prototype.startTimer = function () {
+        var _this = this;
+        io.to('gameRoom').emit('timerStart', this.duration);
+        this.t = setInterval(function () {
+            _this.timeLeft -= 1;
+            console.log(_this.timeLeft);
+            console.log('waiting for ', waitingFor);
+            if (_this.timeLeft === 0) {
+                for (var _i = 0, waitingFor_1 = waitingFor; _i < waitingFor_1.length; _i++) {
+                    var p = waitingFor_1[_i];
+                    var playerSocketID = players[p].socketID;
+                    io.to(playerSocketID).emit('timeUp');
+                }
+                clearInterval(_this.t);
+            }
+            else
+                io.to('gameRoom').emit('timerUpdate', _this.timeLeft);
+        }, 1000);
+    };
+    Timer.prototype.stopTimer = function () {
+        clearInterval(this.t);
+        this.timeLeft = this.duration;
+    };
+    return Timer;
+}());
 var askedQuestions = {};
 var players = {};
 var playerQueue = [];
-var waitingFor;
+var waitingFor = [];
 var playerGivenChoices = {};
 var question;
 var category;
@@ -69,6 +100,7 @@ var answer;
 var playerAnswers = {};
 var skipVotes = new Set();
 var gameInProgress = false;
+var timer = new Timer(60);
 // Add the WebSocket handlers
 io.on('connection', function (socket) {
     var _this = this;
@@ -101,6 +133,7 @@ io.on('connection', function (socket) {
                 var userQuit = player;
                 try {
                     removeFromPlayerQueue(playerDetails.socketID);
+                    removeFromWaitingFor(player);
                     for (var _c = 0, playerQueue_1 = playerQueue; _c < playerQueue_1.length; _c++) {
                         var s = playerQueue_1[_c];
                         io.to(s).emit('log', userQuit + " has quit");
@@ -113,6 +146,7 @@ io.on('connection', function (socket) {
                 break;
             }
         }
+        socket.leaveAll();
         if (Object.keys(players).length < 2) {
             if (!gameInProgress)
                 hideStartButtonToAdmin();
@@ -136,8 +170,8 @@ io.on('connection', function (socket) {
                     _a.label = 2;
                 case 2:
                     gameInProgress = true;
-                    startNewRound();
                     fillWaitingFor();
+                    startNewRound();
                     return [2 /*return*/];
             }
         });
@@ -156,6 +190,7 @@ io.on('connection', function (socket) {
         removeFromWaitingFor(username);
         io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
         if (waitingFor.length == 0) {
+            timer.stopTimer();
             // combining player given choices with the correct answer in an array
             var choices = Object.values(playerGivenChoices);
             choices.push(answer);
@@ -225,6 +260,7 @@ io.on('connection', function (socket) {
         if (waitingFor.length == 0) {
             // remove the current question
             questions.shift();
+            fillWaitingFor();
             startNewRound();
         }
     });
@@ -290,13 +326,34 @@ function startNewRound() {
             category = questionObject.category;
             playerAnswers = {};
             playerGivenChoices = {};
-            fillWaitingFor();
+            timer.startTimer();
             io.to('gameRoom').emit('hideLogs');
             io.to('gameRoom').emit('initaliseRoundStart', question, category, players);
             return [2 /*return*/];
         });
     });
 }
+// function startTimer() {
+//     let timeLeft = 60;
+//     console.log('in start timer');
+//     io.to('gameRoom').emit('timerStart', timeLeft);
+//     let timer = setInterval(() => {
+//         timeLeft--;
+//         if (waitingFor.length === 0) {
+//             console.log('all players submitted');
+//             clearInterval(timer);
+//             fillWaitingFor();
+//         }
+//         else if (timeLeft === 0) {
+//             for (let p of waitingFor) {
+//                 let playerSocketID = players[p].socketID;
+//                 io.to(playerSocketID).emit('timeUp');
+//             }
+//             clearInterval(timer);
+//         } 
+//         else io.to('gameRoom').emit('timerUpdate', timeLeft);
+//     }, 1000);
+// }
 function shuffle(a) {
     var j, x, i;
     for (i = a.length - 1; i > 0; i--) {

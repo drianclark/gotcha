@@ -19,6 +19,7 @@ const submitGivenChoiceButton = document.getElementById("submitGivenChoice");
 const choicesContainer = document.getElementById("choicesContainer");
 const resultsContainer = document.getElementById("resultsContainer");
 const resultsDiv = document.getElementById("results");
+const timerText = document.getElementById("timerText");
 const skipQuestionButton = document.getElementById("skipQuestionButton") as HTMLInputElement;
 const skipQuestionSpinner = document.getElementById("skipQuestionSpinner");
 const skipQuestionCheck = document.getElementById("skipQuestionCheck");
@@ -178,6 +179,19 @@ socket.on('skipVoteReceived', (voter: string) => {
     notificationsContainer.appendChild(skipVoteNotification)
 });
 
+socket.on('timerStart', (timeLeft: string) => {
+    timerText.textContent = timeLeft;
+    show(timerText);
+});
+
+socket.on('timerUpdate', (timeLeft: string) => {
+    timerText.textContent = timeLeft;
+})
+
+socket.on('timeUp', () => {
+    console.log('time is up!');
+});
+
 socket.on('givenChoiceError', (choice: string) => {
     alert(`Duplicate choice: ${choice}`);
 })
@@ -185,6 +199,7 @@ socket.on('givenChoiceError', (choice: string) => {
 socket.on('givenChoiceApproved', () => {
     hide(questionContainer);
     hide(madeUpChoiceForm);
+    hide(timerText);
 
     show(waitingForContainer, 'flex');
 })

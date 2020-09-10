@@ -56,10 +56,50 @@ interface questionObject {
     id: number;
 }
 
+class Timer {
+    duration: number;
+    timeLeft: number;
+    t: NodeJS.Timeout;
+
+    constructor(duration: number) {
+        this.duration = duration;
+        this.timeLeft = duration;
+        console.log(this.timeLeft);
+    }
+
+    startTimer() {
+        io.to('gameRoom').emit('timerStart', this.duration);
+
+        this.t = setInterval(() => {
+            this.timeLeft -= 1;
+            console.log(this.timeLeft);
+
+            console.log('waiting for ', waitingFor);
+
+            if (this.timeLeft === 0) {
+
+                for (let p of waitingFor) {
+                    let playerSocketID = players[p].socketID;
+                    io.to(playerSocketID).emit('timeUp');
+                }
+                clearInterval(this.t);
+            } 
+
+            else io.to('gameRoom').emit('timerUpdate', this.timeLeft);
+
+        }, 1000);
+    }
+
+    stopTimer() {
+        clearInterval(this.t);
+        this.timeLeft = this.duration;
+    }
+}
+
 var askedQuestions = {};
 var players: players = {};
 var playerQueue: socketID[] = [];
-var waitingFor: string[];
+var waitingFor: string[] = [];
 var playerGivenChoices: playerChoices = {};
 var question: string;
 var category: string;
@@ -68,6 +108,7 @@ var playerAnswers: playerAnswers = {};
 var skipVotes: Set<string> = new Set<string>();
 var gameInProgress: boolean = false;
 
+const timer = new Timer(60);
 
 // Add the WebSocket handlers
 io.on('connection', function(socket: SocketIO.Socket) {
@@ -111,6 +152,7 @@ io.on('connection', function(socket: SocketIO.Socket) {
 
                 try {
                     removeFromPlayerQueue(playerDetails.socketID);
+                    removeFromWaitingFor(player);
 
                     for (const s of playerQueue) {
                         io.to(s).emit('log', `${userQuit} has quit`);
@@ -124,6 +166,8 @@ io.on('connection', function(socket: SocketIO.Socket) {
                 break;
             }
         }
+
+        socket.leaveAll();
 
         if (Object.keys(players).length < 2) {
             if (!gameInProgress) hideStartButtonToAdmin();
@@ -145,9 +189,8 @@ io.on('connection', function(socket: SocketIO.Socket) {
         }
 
         gameInProgress = true;
-        startNewRound();
-
         fillWaitingFor();
+        startNewRound();
         // when the players finish answering, they emit questionChoiceSubmitted
     });
 
@@ -171,6 +214,7 @@ io.on('connection', function(socket: SocketIO.Socket) {
         io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
 
         if (waitingFor.length == 0) {
+            timer.stopTimer();
             // combining player given choices with the correct answer in an array
             let choices: string[] = Object.values(playerGivenChoices);
             choices.push(answer);
@@ -261,6 +305,7 @@ io.on('connection', function(socket: SocketIO.Socket) {
         if (waitingFor.length == 0) {
             // remove the current question
             questions.shift();
+            fillWaitingFor();
             startNewRound();
         }
     })
@@ -324,11 +369,42 @@ async function startNewRound() {
     playerAnswers = {};
     playerGivenChoices = {};
 
-    fillWaitingFor();
-
+    timer.startTimer();
     io.to('gameRoom').emit('hideLogs');
     io.to('gameRoom').emit('initaliseRoundStart', question, category, players);
 }
+
+// function startTimer() {
+//     let timeLeft = 60;
+//     console.log('in start timer');
+//     io.to('gameRoom').emit('timerStart', timeLeft);
+
+    
+
+//     let timer = setInterval(() => {
+//         timeLeft--;
+
+//         if (waitingFor.length === 0) {
+//             console.log('all players submitted');
+//             clearInterval(timer);
+//             fillWaitingFor();
+//         }
+
+//         else if (timeLeft === 0) {
+
+//             for (let p of waitingFor) {
+//                 let playerSocketID = players[p].socketID;
+//                 io.to(playerSocketID).emit('timeUp');
+//             }
+
+//             clearInterval(timer);
+//         } 
+
+//         else io.to('gameRoom').emit('timerUpdate', timeLeft);
+
+//     }, 1000);
+
+// }
 
 function shuffle(a: any[]) {
     var j, x, i;
