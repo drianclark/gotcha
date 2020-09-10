@@ -173,6 +173,9 @@ socket.on('timerUpdate', function (timeLeft) {
 });
 socket.on('timeUp', function () {
     console.log('time is up!');
+    if (submitGivenChoiceButton.style.display != 'none') {
+        socket.emit('questionChoiceSubmitted', username, "<no answer from " + username + ">");
+    }
 });
 socket.on('givenChoiceError', function (choice) {
     alert("Duplicate choice: " + choice);

@@ -53,7 +53,7 @@ interface questionObject {
     question: string;
     answer: string;
     category: string;
-    id: number;
+    id: number;timeUp
 }
 
 class Timer {
@@ -72,9 +72,6 @@ class Timer {
 
         this.t = setInterval(() => {
             this.timeLeft -= 1;
-            console.log(this.timeLeft);
-
-            console.log('waiting for ', waitingFor);
 
             if (this.timeLeft === 0) {
 
@@ -108,7 +105,7 @@ var playerAnswers: playerAnswers = {};
 var skipVotes: Set<string> = new Set<string>();
 var gameInProgress: boolean = false;
 
-const timer = new Timer(60);
+const timer = new Timer(5);
 
 // Add the WebSocket handlers
 io.on('connection', function(socket: SocketIO.Socket) {
@@ -219,6 +216,8 @@ io.on('connection', function(socket: SocketIO.Socket) {
             timer.stopTimer();
             // combining player given choices with the correct answer in an array
             let choices: string[] = Object.values(playerGivenChoices);
+            choices = choices.filter(choice => !choice.includes('<no answer from'))
+            console.log(choices);
             choices.push(answer);
             // transforming all strings to lowercase
             choices = choices.map(x => removePeriod(x.toLowerCase()));
@@ -281,7 +280,9 @@ io.on('connection', function(socket: SocketIO.Socket) {
             // filling waitingFor again
             fillWaitingFor();
             
-            let wrongChoices = Object.values(playerGivenChoices).filter(e => { return e !== answer });
+            let wrongChoices = Object.values(playerGivenChoices)
+                                .filter(e => e !== answer)
+                                .filter(e => !e.includes('<no answer from'));
 
             // show results
             io.to('gameRoom').emit('displayResults', wrongChoices, answer, playerAnswers);
@@ -360,6 +361,13 @@ function removeFromWaitingFor(username: string) {
     const index = waitingFor.indexOf(username);
     if (index > -1) {
         waitingFor.splice(index, 1);
+    }
+}
+
+function removeFromArray(a: any[], e:any) {
+    const index = a.indexOf(e);
+    if (index > -1) {
+        a.splice(index, 1);
     }
 }
 

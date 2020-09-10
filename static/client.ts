@@ -190,6 +190,9 @@ socket.on('timerUpdate', (timeLeft: string) => {
 
 socket.on('timeUp', () => {
     console.log('time is up!');
+    if (submitGivenChoiceButton.style.display != 'none') {
+        socket.emit('questionChoiceSubmitted', username, `<no answer from ${username}>`);
+    }
 });
 
 socket.on('givenChoiceError', (choice: string) => {

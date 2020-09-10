@@ -69,8 +69,6 @@ var Timer = /** @class */ (function () {
         io.to('gameRoom').emit('timerStart', this.duration);
         this.t = setInterval(function () {
             _this.timeLeft -= 1;
-            console.log(_this.timeLeft);
-            console.log('waiting for ', waitingFor);
             if (_this.timeLeft === 0) {
                 for (var _i = 0, waitingFor_1 = waitingFor; _i < waitingFor_1.length; _i++) {
                     var p = waitingFor_1[_i];
@@ -100,7 +98,7 @@ var answer;
 var playerAnswers = {};
 var skipVotes = new Set();
 var gameInProgress = false;
-var timer = new Timer(60);
+var timer = new Timer(5);
 // Add the WebSocket handlers
 io.on('connection', function (socket) {
     var _this = this;
@@ -194,6 +192,8 @@ io.on('connection', function (socket) {
             timer.stopTimer();
             // combining player given choices with the correct answer in an array
             var choices = Object.values(playerGivenChoices);
+            choices = choices.filter(function (choice) { return !choice.includes('<no answer from'); });
+            console.log(choices);
             choices.push(answer);
             // transforming all strings to lowercase
             choices = choices.map(function (x) { return removePeriod(x.toLowerCase()); });
@@ -242,7 +242,9 @@ io.on('connection', function (socket) {
             }
             // filling waitingFor again
             fillWaitingFor();
-            var wrongChoices = Object.values(playerGivenChoices).filter(function (e) { return e !== answer; });
+            var wrongChoices = Object.values(playerGivenChoices)
+                .filter(function (e) { return e !== answer; })
+                .filter(function (e) { return !e.includes('<no answer from'); });
             // show results
             io.to('gameRoom').emit('displayResults', wrongChoices, answer, playerAnswers);
             // after showing results, the clients emit resultsShown
@@ -316,6 +318,12 @@ function removeFromWaitingFor(username) {
     var index = waitingFor.indexOf(username);
     if (index > -1) {
         waitingFor.splice(index, 1);
+    }
+}
+function removeFromArray(a, e) {
+    var index = a.indexOf(e);
+    if (index > -1) {
+        a.splice(index, 1);
     }
 }
 function startNewRound() {
