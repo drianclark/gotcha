@@ -385,38 +385,6 @@ async function startNewRound() {
     io.to('gameRoom').emit('initaliseRoundStart', question, category, players);
 }
 
-// function startTimer() {
-//     let timeLeft = 60;
-//     console.log('in start timer');
-//     io.to('gameRoom').emit('timerStart', timeLeft);
-
-    
-
-//     let timer = setInterval(() => {
-//         timeLeft--;
-
-//         if (waitingFor.length === 0) {
-//             console.log('all players submitted');
-//             clearInterval(timer);
-//             fillWaitingFor();
-//         }
-
-//         else if (timeLeft === 0) {
-
-//             for (let p of waitingFor) {
-//                 let playerSocketID = players[p].socketID;
-//                 io.to(playerSocketID).emit('timeUp');
-//             }
-
-//             clearInterval(timer);
-//         } 
-
-//         else io.to('gameRoom').emit('timerUpdate', timeLeft);
-
-//     }, 1000);
-
-// }
-
 function shuffle(a: any[]) {
     var j, x, i;
     for (i = a.length - 1; i > 0; i--) {
