@@ -46,27 +46,10 @@ var server = http.Server(app);
 var io = socketIO(server);
 var sqlite3 = require('sqlite3').verbose();
 var sqlite = require('sqlite');
-var triviaCategories;
 var questions = [];
 var PORT = process.env.PORT || 5000;
 app.set('port', PORT);
 app.use('/static', express.static(__dirname + '/static'));
-if (PORT === 5000) {
-    triviaCategories = {
-        'mythology': 'https://opentdb.com/api.php?amount=1&category=20&difficulty=hard&type=multiple&encode=base64',
-        'history': 'https://opentdb.com/api.php?amount=1&category=23&difficulty=hard&type=multiple&encode=base64',
-        'celebrities': 'https://opentdb.com/api.php?amount=1&category=26&type=multiple&encode=base64'
-    };
-}
-else {
-    triviaCategories = {
-        'animals': 'https://opentdb.com/api.php?amount=1&category=27&type=multiple&encode=base64',
-        'generalKnowledge': 'https://opentdb.com/api.php?amount=1&category=9&type=multiple&encode=base64',
-        'science&Nature': 'https://opentdb.com/api.php?amount=1&category=17&type=multiple&encode=base64',
-        'books': 'https://opentdb.com/api.php?amount=1&category=10&type=multiple&encode=base64',
-        'comics': 'https://opentdb.com/api.php?amount=1&category=29&type=multiple&encode=base64'
-    };
-}
 // Routing
 app.get('/', function (request, response) {
     response.sendFile(path.join(__dirname, 'index.html'));
@@ -351,9 +334,6 @@ function givePoint(player) {
 }
 function fillWaitingFor() {
     waitingFor = Object.keys(players);
-}
-function hash(s) {
-    return s.split("").reduce(function (a, b) { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0);
 }
 function allPlayersVotedToSkip() {
     for (var _i = 0, _a = Object.keys(players); _i < _a.length; _i++) {

@@ -13,30 +13,11 @@ const io = socketIO(server);
 const sqlite3 = require('sqlite3').verbose();
 const sqlite = require('sqlite')
 
-var triviaCategories: Object;
 var questions: questionObject[] = [];
 
 const PORT = process.env.PORT || 5000;
 app.set('port', PORT);
 app.use('/static', express.static(__dirname + '/static'));
-
-if (PORT === 5000) {
-    triviaCategories = {
-        'mythology':'https://opentdb.com/api.php?amount=1&category=20&difficulty=hard&type=multiple&encode=base64',
-        'history':'https://opentdb.com/api.php?amount=1&category=23&difficulty=hard&type=multiple&encode=base64',
-        'celebrities':'https://opentdb.com/api.php?amount=1&category=26&type=multiple&encode=base64'
-    }
-}
-
-else {
-    triviaCategories = {
-        'animals':'https://opentdb.com/api.php?amount=1&category=27&type=multiple&encode=base64',
-        'generalKnowledge':'https://opentdb.com/api.php?amount=1&category=9&type=multiple&encode=base64',
-        'science&Nature':'https://opentdb.com/api.php?amount=1&category=17&type=multiple&encode=base64',
-        'books':'https://opentdb.com/api.php?amount=1&category=10&type=multiple&encode=base64',
-        'comics':'https://opentdb.com/api.php?amount=1&category=29&type=multiple&encode=base64'
-    }
-}
 
 // Routing
 app.get('/', function(request, response) {
