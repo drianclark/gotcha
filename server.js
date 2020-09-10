@@ -47,7 +47,7 @@ var io = socketIO(server);
 var sqlite3 = require('sqlite3').verbose();
 var sqlite = require('sqlite');
 var triviaCategories;
-var questions;
+var questions = [];
 var PORT = process.env.PORT || 5000;
 app.set('port', PORT);
 app.use('/static', express.static(__dirname + '/static'));
@@ -103,15 +103,12 @@ io.on('connection', function (socket) {
             score: 0,
             socketID: socket.id
         };
-        console.log(username + ' has joined!');
         logForAll(username + ' has joined!');
         playerQueue.push(socket.id);
         updatePlayers();
         if (Object.keys(players).length >= 1) {
-            console.log(players.length);
             showStartButtonToAdmin();
         }
-        console.log(players);
     });
     // on quit
     socket.on('disconnect', function () {
@@ -133,7 +130,6 @@ io.on('connection', function (socket) {
                 break;
             }
         }
-        console.log(userQuit + ' has quit');
         if (Object.keys(players).length < 2) {
             if (!gameInProgress)
                 hideStartButtonToAdmin();
@@ -143,29 +139,19 @@ io.on('connection', function (socket) {
                 io.to('gameRoom').emit('returnToLobby');
             }
         }
-        console.log(Object.keys(players));
         updatePlayers();
     });
     // start round
     socket.on('startRound', function () { return __awaiter(_this, void 0, void 0, function () {
-        var db, query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (!!gameInProgress) return [3 /*break*/, 3];
-                    return [4 /*yield*/, sqlite.open({
-                            filename: './db/gotcha.db',
-                            driver: sqlite3.Database
-                        })];
+                    if (!(questions.length == 0)) return [3 /*break*/, 2];
+                    return [4 /*yield*/, fetchQuestions()];
                 case 1:
-                    db = _a.sent();
-                    query = "SELECT * FROM questions ORDER BY random() LIMIT 100;";
-                    return [4 /*yield*/, db.all(query)];
+                    _a.sent();
+                    _a.label = 2;
                 case 2:
-                    questions = _a.sent();
-                    db.close();
-                    _a.label = 3;
-                case 3:
                     gameInProgress = true;
                     startNewRound();
                     fillWaitingFor();
@@ -187,7 +173,6 @@ io.on('connection', function (socket) {
         removeFromWaitingFor(username);
         io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
         if (waitingFor.length == 0) {
-            console.log(Object.values(playerGivenChoices));
             // combining player given choices with the correct answer in an array
             var choices = Object.values(playerGivenChoices);
             choices.push(answer);
@@ -202,7 +187,6 @@ io.on('connection', function (socket) {
     });
     socket.on('skipVoteSubmitted', function (username) {
         var playerSocketID = socket.id;
-        console.log(playerSocketID);
         // add user to array of skipVotes
         skipVotes.push(username);
         io.to('gameRoom').emit('skipVoteReceived', username);
@@ -221,13 +205,10 @@ io.on('connection', function (socket) {
         io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
         // displays waiting for
         io.to(playerSocketID).emit('answerReceived', waitingFor);
-        console.log(username + ' answered ' + userAnswer);
         if (waitingFor.length == 0) {
-            console.log('The correct answer is: ' + answer);
             for (var _i = 0, _a = Object.entries(playerAnswers); _i < _a.length; _i++) {
                 var _b = _a[_i], player = _b[0], playerAnswer = _b[1];
                 if (playerAnswer == answer) {
-                    console.log(player + ' gains a point');
                     givePoint(player);
                 }
                 else {
@@ -235,11 +216,9 @@ io.on('connection', function (socket) {
                     // give a point to the player who made up that answer
                     if (playerAnswer != playerGivenChoices[username]) {
                         var gotBy = getPlayerWhoSubmittedFakeAnswer(playerAnswer);
-                        console.log(gotBy);
                         givePoint(gotBy);
                     }
                 }
-                console.log(players);
             }
             // filling waitingFor again
             fillWaitingFor();
@@ -269,6 +248,27 @@ io.on('connection', function (socket) {
 });
 // io.sockets.emit sends message to all sockets;
 // socket.on only responds to the one socket that emitted something
+function fetchQuestions() {
+    return __awaiter(this, void 0, void 0, function () {
+        var db, query;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, sqlite.open({
+                        filename: './db/gotcha.db',
+                        driver: sqlite3.Database
+                    })];
+                case 1:
+                    db = _a.sent();
+                    query = "SELECT * FROM questions ORDER BY random() LIMIT 100;";
+                    return [4 /*yield*/, db.all(query)];
+                case 2:
+                    questions = _a.sent();
+                    db.close();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
 function updatePlayers() {
     io.to('gameRoom').emit('playersList', Object.keys(players));
 }

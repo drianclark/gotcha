@@ -14,7 +14,7 @@ const sqlite3 = require('sqlite3').verbose();
 const sqlite = require('sqlite')
 
 var triviaCategories: Object;
-var questions: questionObject[];
+var questions: questionObject[] = [];
 
 const PORT = process.env.PORT || 5000;
 app.set('port', PORT);
@@ -109,7 +109,6 @@ io.on('connection', function(socket: SocketIO.Socket) {
             socketID: socket.id
         }
 
-        console.log(username + ' has joined!');
         logForAll(username + ' has joined!');
 
         playerQueue.push(socket.id);
@@ -117,11 +116,9 @@ io.on('connection', function(socket: SocketIO.Socket) {
         updatePlayers();
 
         if (Object.keys(players).length >= 1) {
-            console.log(players.length);
             showStartButtonToAdmin();
         }
 
-        console.log(players);
     });
 
     // on quit
@@ -147,8 +144,6 @@ io.on('connection', function(socket: SocketIO.Socket) {
             }
         }
 
-        console.log(userQuit + ' has quit');
-
         if (Object.keys(players).length < 2) {
             if (!gameInProgress) hideStartButtonToAdmin();
 
@@ -159,22 +154,13 @@ io.on('connection', function(socket: SocketIO.Socket) {
             }
         }
         
-        console.log(Object.keys(players));
         updatePlayers();
     })
 
     // start round
     socket.on('startRound', async () => {
-        if (!gameInProgress) {
-            const db = await sqlite.open({
-                    filename: './db/gotcha.db',
-                    driver: sqlite3.Database
-            });
-
-            let query:string = `SELECT * FROM questions ORDER BY random() LIMIT 100;`;
-
-            questions = await db.all(query);
-            db.close();
+        if (questions.length == 0) {
+            await fetchQuestions();
         }
 
         gameInProgress = true;
@@ -204,8 +190,6 @@ io.on('connection', function(socket: SocketIO.Socket) {
         io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
 
         if (waitingFor.length == 0) {
-            console.log(Object.values(playerGivenChoices));
-
             // combining player given choices with the correct answer in an array
             let choices: string[] = Object.values(playerGivenChoices);
             choices.push(answer);
@@ -224,7 +208,6 @@ io.on('connection', function(socket: SocketIO.Socket) {
 
     socket.on('skipVoteSubmitted', (username: string) => {
         let playerSocketID = socket.id;
-        console.log(playerSocketID);
         // add user to array of skipVotes
         skipVotes.push(username)
 
@@ -250,14 +233,9 @@ io.on('connection', function(socket: SocketIO.Socket) {
         // displays waiting for
         io.to(playerSocketID).emit('answerReceived', waitingFor);
 
-        console.log(username + ' answered ' + userAnswer);
-
         if (waitingFor.length == 0) {
-            console.log('The correct answer is: ' + answer);
-
             for (const [player, playerAnswer] of Object.entries(playerAnswers)) {
                 if (playerAnswer == answer) {
-                    console.log(player + ' gains a point');
                     givePoint(player)
                 }
 
@@ -266,12 +244,10 @@ io.on('connection', function(socket: SocketIO.Socket) {
                     // give a point to the player who made up that answer
                     if (playerAnswer != playerGivenChoices[username]) {
                         let gotBy = getPlayerWhoSubmittedFakeAnswer(playerAnswer);
-                        console.log(gotBy);
                         givePoint(gotBy);
                     }
                 }
 
-                console.log(players);
             }
 
             // filling waitingFor again
@@ -312,6 +288,19 @@ io.on('connection', function(socket: SocketIO.Socket) {
 
 // io.sockets.emit sends message to all sockets;
 // socket.on only responds to the one socket that emitted something
+
+async function fetchQuestions() {
+    let db = await sqlite.open({
+        filename: './db/gotcha.db',
+        driver: sqlite3.Database
+    });
+
+    let query:string = `SELECT * FROM questions ORDER BY random() LIMIT 100;`;
+
+    questions = await db.all(query);
+    db.close();
+}
+
 
 function updatePlayers() {
     io.to('gameRoom').emit('playersList', Object.keys(players));
