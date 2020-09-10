@@ -84,7 +84,7 @@ var question: string;
 var category: string;
 var answer: string;
 var playerAnswers: playerAnswers = {};
-var skipVotes: string[] = [];
+var skipVotes: Set<string> = new Set<string>();
 var gameInProgress: boolean = false;
 
 
@@ -209,13 +209,13 @@ io.on('connection', function(socket: SocketIO.Socket) {
     socket.on('skipVoteSubmitted', (username: string) => {
         let playerSocketID = socket.id;
         // add user to array of skipVotes
-        skipVotes.push(username)
+        skipVotes.add(username);
 
         io.to('gameRoom').emit('skipVoteReceived', username);
 
         // check all players voted to skip
         if (allPlayersVotedToSkip()) {
-            skipVotes = [];
+            skipVotes.clear();
             io.to('gameRoom').emit('roundEnd');
         }
     })
@@ -397,16 +397,8 @@ function hash (s: string): number {
 }
 
 function allPlayersVotedToSkip(): boolean {
-    let voteHashmap = {}
-
-    for (const player of skipVotes) {
-        voteHashmap[player] = 1;    
-    }
-
-    console.log(voteHashmap);
-
     for (const p of Object.keys(players)) {
-        if (voteHashmap[p] == undefined) return false;
+        if (!skipVotes.has(p)) return false;
     }
 
     return true;

@@ -84,7 +84,7 @@ var question;
 var category;
 var answer;
 var playerAnswers = {};
-var skipVotes = [];
+var skipVotes = new Set();
 var gameInProgress = false;
 // Add the WebSocket handlers
 io.on('connection', function (socket) {
@@ -188,11 +188,11 @@ io.on('connection', function (socket) {
     socket.on('skipVoteSubmitted', function (username) {
         var playerSocketID = socket.id;
         // add user to array of skipVotes
-        skipVotes.push(username);
+        skipVotes.add(username);
         io.to('gameRoom').emit('skipVoteReceived', username);
         // check all players voted to skip
         if (allPlayersVotedToSkip()) {
-            skipVotes = [];
+            skipVotes.clear();
             io.to('gameRoom').emit('roundEnd');
         }
     });
@@ -356,15 +356,9 @@ function hash(s) {
     return s.split("").reduce(function (a, b) { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0);
 }
 function allPlayersVotedToSkip() {
-    var voteHashmap = {};
-    for (var _i = 0, skipVotes_1 = skipVotes; _i < skipVotes_1.length; _i++) {
-        var player = skipVotes_1[_i];
-        voteHashmap[player] = 1;
-    }
-    console.log(voteHashmap);
-    for (var _a = 0, _b = Object.keys(players); _a < _b.length; _a++) {
-        var p = _b[_a];
-        if (voteHashmap[p] == undefined)
+    for (var _i = 0, _a = Object.keys(players); _i < _a.length; _i++) {
+        var p = _a[_i];
+        if (!skipVotes.has(p))
             return false;
     }
     return true;
