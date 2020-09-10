@@ -392,10 +392,6 @@ function fillWaitingFor() {
     waitingFor = Object.keys(players);
 }
 
-function hash (s: string): number {
-    return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);              
-}
-
 function allPlayersVotedToSkip(): boolean {
     for (const p of Object.keys(players)) {
         if (!skipVotes.has(p)) return false;
