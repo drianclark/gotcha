@@ -171,9 +171,11 @@ io.on('connection', function(socket: SocketIO.Socket) {
 
         if (Object.keys(players).length < 2) {
             if (!gameInProgress) hideStartButtonToAdmin();
+            
 
             else {
                 gameInProgress = false;
+                timer.stopTimer();
                 io.to('gameRoom').emit('insufficientPlayers');
                 io.to('gameRoom').emit('returnToLobby');
             }
@@ -241,6 +243,7 @@ io.on('connection', function(socket: SocketIO.Socket) {
         // check all players voted to skip
         if (allPlayersVotedToSkip()) {
             skipVotes.clear();
+            timer.stopTimer();
             io.to('gameRoom').emit('roundEnd');
         }
     })
