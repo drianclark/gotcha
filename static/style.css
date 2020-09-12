@@ -60,6 +60,9 @@ body {
 .choicesContainer .choiceButton {
   min-width: 30%; }
 
+.choicesContainer .answerTimerText {
+  display: none; }
+
 .waitingForContainer {
   display: none !important;
   height: 100vh; }

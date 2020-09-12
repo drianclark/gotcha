@@ -53,7 +53,7 @@ interface questionObject {
     question: string;
     answer: string;
     category: string;
-    id: number;timeUp
+    id: number;
 }
 
 class Timer {
@@ -64,7 +64,6 @@ class Timer {
     constructor(duration: number) {
         this.duration = duration;
         this.timeLeft = duration;
-        console.log(this.timeLeft);
     }
 
     startTimer() {
@@ -105,7 +104,7 @@ var playerAnswers: playerAnswers = {};
 var skipVotes: Set<string> = new Set<string>();
 var gameInProgress: boolean = false;
 
-const timer = new Timer(5);
+const timer = new Timer(60);
 
 // Add the WebSocket handlers
 io.on('connection', function(socket: SocketIO.Socket) {
@@ -217,13 +216,14 @@ io.on('connection', function(socket: SocketIO.Socket) {
             // combining player given choices with the correct answer in an array
             let choices: string[] = Object.values(playerGivenChoices);
             choices = choices.filter(choice => !choice.includes('<no answer from'))
-            console.log(choices);
             choices.push(answer);
             // transforming all strings to lowercase
             choices = choices.map(x => removePeriod(x.toLowerCase()));
 
             // shuffling order of choices
             shuffle(choices);
+
+            timer.startTimer();
             
             io.to('gameRoom').emit('displayChoices', choices);
 
@@ -261,6 +261,8 @@ io.on('connection', function(socket: SocketIO.Socket) {
         io.to(playerSocketID).emit('answerReceived', waitingFor);
 
         if (waitingFor.length == 0) {
+            timer.stopTimer();
+
             for (const [player, playerAnswer] of Object.entries(playerAnswers)) {
                 if (playerAnswer == answer) {
                     givePoint(player)
@@ -380,9 +382,9 @@ async function startNewRound() {
     playerAnswers = {};
     playerGivenChoices = {};
 
-    timer.startTimer();
     io.to('gameRoom').emit('hideLogs');
     io.to('gameRoom').emit('initaliseRoundStart', question, category, players);
+    timer.startTimer();
 }
 
 function shuffle(a: any[]) {

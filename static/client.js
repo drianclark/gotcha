@@ -52,7 +52,8 @@ var submitGivenChoiceButton = document.getElementById("submitGivenChoice");
 var choicesContainer = document.getElementById("choicesContainer");
 var resultsContainer = document.getElementById("resultsContainer");
 var resultsDiv = document.getElementById("results");
-var timerText = document.getElementById("timerText");
+var choiceTimerText = document.getElementById("choiceTimerText");
+var answerTimerText = document.getElementById("answerTimerText");
 var skipQuestionButton = document.getElementById("skipQuestionButton");
 var skipQuestionSpinner = document.getElementById("skipQuestionSpinner");
 var skipQuestionCheck = document.getElementById("skipQuestionCheck");
@@ -63,6 +64,11 @@ var scoresList = document.getElementById("scoresList");
 var notificationsContainer = document.getElementById("notificationsContainer");
 var logs = document.getElementById("logs");
 var logsBox = document.getElementById("logsBox");
+var gameState;
+(function (gameState) {
+    gameState[gameState["ChoiceSubmission"] = 1] = "ChoiceSubmission";
+    gameState[gameState["AnswerSubmission"] = 2] = "AnswerSubmission";
+})(gameState || (gameState = {}));
 usernameSubmit.addEventListener("click", function () {
     if (usernameField.value.length != 0) {
         username = filterXSS(usernameField.value);
@@ -165,11 +171,12 @@ socket.on('skipVoteReceived', function (voter) {
     notificationsContainer.appendChild(skipVoteNotification);
 });
 socket.on('timerStart', function (timeLeft) {
-    timerText.textContent = timeLeft;
-    show(timerText);
+    updateTimer(timeLeft);
+    console.log('show timer');
+    showTimer();
 });
 socket.on('timerUpdate', function (timeLeft) {
-    timerText.textContent = timeLeft;
+    updateTimer(timeLeft);
 });
 socket.on('timeUp', function () {
     console.log('time is up!');
@@ -183,7 +190,7 @@ socket.on('givenChoiceError', function (choice) {
 socket.on('givenChoiceApproved', function () {
     hide(questionContainer);
     hide(madeUpChoiceForm);
-    hide(timerText);
+    hide(choiceTimerText);
     show(waitingForContainer, 'flex');
 });
 socket.on('updatedWaitingFor', function (waitingFor) {
@@ -195,6 +202,7 @@ socket.on('displayChoices', function (choices) {
     show(questionContainer);
     hide(skipQuestionButton);
     show(choicesContainer);
+    show(answerTimerText);
     var _loop_1 = function (choice) {
         var row = document.createElement('div');
         row.className = 'row justify-content-center mb-2';
@@ -207,7 +215,7 @@ socket.on('displayChoices', function (choices) {
             socket.emit('answerSubmitted', username, choiceButton.value);
         });
         row.appendChild(choiceButton);
-        choicesContainer.appendChild(row);
+        choicesContainer.insertBefore(row, choicesContainer.firstChild);
     };
     for (var _i = 0, choices_1 = choices; _i < choices_1.length; _i++) {
         var choice = choices_1[_i];
@@ -226,6 +234,7 @@ socket.on('displayResults', function (wrongChoices, answer, playerAnswers) { ret
             case 0:
                 hide(bottomContainer);
                 hide(waitingForContainer);
+                hide(answerTimerText);
                 show(resultsContainer);
                 show(resultsDiv);
                 return [4 /*yield*/, constructAndShowRoundResults(wrongChoices, answer, playerAnswers)];
@@ -249,6 +258,8 @@ socket.on('roundEnd', function () {
     userGivenChoiceField.value = '';
     // removing choices
     choicesContainer.innerHTML = '';
+    choiceTimerText.textContent = '';
+    answerTimerText.textContent = '';
     // removing notifications text
     notificationsContainer.innerHTML = '';
     skipQuestionButton.disabled = false;
@@ -287,6 +298,31 @@ function show(element, displayParam) {
 }
 function sleep(ms) {
     return new Promise(function (resolve) { return setTimeout(resolve, ms); });
+}
+function updateTimer(t) {
+    // if in choice submission
+    if (madeUpChoiceForm.style.display != 'none') {
+        choiceTimerText.textContent = t;
+        console.log('updated choice timer: ' + t);
+    }
+    // if in answer submission
+    else if (choicesContainer.style.display != 'none') {
+        answerTimerText.textContent = t;
+        console.log('updated answer timer: ' + t);
+    }
+}
+function showTimer() {
+    // if in choice submission
+    if (madeUpChoiceForm.style.display != 'none') {
+        show(choiceTimerText);
+        console.log('showed choiceTimerText');
+    }
+    // if in answer submission
+    else if (choicesContainer.style.display != 'none') {
+        show(answerTimerText);
+        console.log('showed choiceTimerText');
+    }
+    console.log('neither timers shown');
 }
 function constructAndShowRoundResults(wrongChoices, answer, playerAnswers) {
     return __awaiter(this, void 0, void 0, function () {
