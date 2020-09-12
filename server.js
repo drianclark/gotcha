@@ -97,7 +97,7 @@ var answer;
 var playerAnswers = {};
 var skipVotes = new Set();
 var gameInProgress = false;
-var timer = new Timer(5);
+var timer = new Timer(60);
 // Add the WebSocket handlers
 io.on('connection', function (socket) {
     var _this = this;

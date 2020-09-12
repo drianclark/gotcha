@@ -66,6 +66,7 @@ var logs = document.getElementById("logs");
 var logsBox = document.getElementById("logsBox");
 var gameState;
 (function (gameState) {
+    gameState[gameState["Lobby"] = 0] = "Lobby";
     gameState[gameState["ChoiceSubmission"] = 1] = "ChoiceSubmission";
     gameState[gameState["AnswerSubmission"] = 2] = "AnswerSubmission";
 })(gameState || (gameState = {}));

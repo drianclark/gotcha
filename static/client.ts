@@ -33,7 +33,8 @@ const logs = document.getElementById("logs");
 const logsBox = document.getElementById("logsBox") as HTMLInputElement;
 
 enum gameState {
-    ChoiceSubmission = 1,
+    Lobby = 0,
+    ChoiceSubmission,
     AnswerSubmission
 }
 
