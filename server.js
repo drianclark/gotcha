@@ -58,10 +58,38 @@ app.get('/', function (request, response) {
 server.listen(PORT, function () {
     console.log("Starting server on port " + PORT);
 });
+var Timer = /** @class */ (function () {
+    function Timer(duration) {
+        this.duration = duration;
+        this.timeLeft = duration;
+    }
+    Timer.prototype.startTimer = function () {
+        var _this = this;
+        io.to('gameRoom').emit('timerStart', this.duration);
+        this.t = setInterval(function () {
+            _this.timeLeft -= 1;
+            if (_this.timeLeft === 0) {
+                for (var _i = 0, waitingFor_1 = waitingFor; _i < waitingFor_1.length; _i++) {
+                    var p = waitingFor_1[_i];
+                    var playerSocketID = players[p].socketID;
+                    io.to(playerSocketID).emit('timeUp');
+                }
+                clearInterval(_this.t);
+            }
+            else
+                io.to('gameRoom').emit('timerUpdate', _this.timeLeft);
+        }, 1000);
+    };
+    Timer.prototype.stopTimer = function () {
+        clearInterval(this.t);
+        this.timeLeft = this.duration;
+    };
+    return Timer;
+}());
 var askedQuestions = {};
 var players = {};
 var playerQueue = [];
-var waitingFor;
+var waitingFor = [];
 var playerGivenChoices = {};
 var question;
 var category;
@@ -69,6 +97,7 @@ var answer;
 var playerAnswers = {};
 var skipVotes = new Set();
 var gameInProgress = false;
+var timer = new Timer(5);
 // Add the WebSocket handlers
 io.on('connection', function (socket) {
     var _this = this;
@@ -101,6 +130,7 @@ io.on('connection', function (socket) {
                 var userQuit = player;
                 try {
                     removeFromPlayerQueue(playerDetails.socketID);
+                    removeFromWaitingFor(player);
                     for (var _c = 0, playerQueue_1 = playerQueue; _c < playerQueue_1.length; _c++) {
                         var s = playerQueue_1[_c];
                         io.to(s).emit('log', userQuit + " has quit");
@@ -113,11 +143,13 @@ io.on('connection', function (socket) {
                 break;
             }
         }
+        socket.leaveAll();
         if (Object.keys(players).length < 2) {
             if (!gameInProgress)
                 hideStartButtonToAdmin();
             else {
                 gameInProgress = false;
+                timer.stopTimer();
                 io.to('gameRoom').emit('insufficientPlayers');
                 io.to('gameRoom').emit('returnToLobby');
             }
@@ -136,8 +168,8 @@ io.on('connection', function (socket) {
                     _a.label = 2;
                 case 2:
                     gameInProgress = true;
-                    startNewRound();
                     fillWaitingFor();
+                    startNewRound();
                     return [2 /*return*/];
             }
         });
@@ -156,13 +188,16 @@ io.on('connection', function (socket) {
         removeFromWaitingFor(username);
         io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
         if (waitingFor.length == 0) {
+            timer.stopTimer();
             // combining player given choices with the correct answer in an array
             var choices = Object.values(playerGivenChoices);
+            choices = choices.filter(function (choice) { return !choice.includes('<no answer from'); });
             choices.push(answer);
             // transforming all strings to lowercase
             choices = choices.map(function (x) { return removePeriod(x.toLowerCase()); });
             // shuffling order of choices
             shuffle(choices);
+            timer.startTimer();
             io.to('gameRoom').emit('displayChoices', choices);
             // filling waitingFor again
             fillWaitingFor();
@@ -176,6 +211,7 @@ io.on('connection', function (socket) {
         // check all players voted to skip
         if (allPlayersVotedToSkip()) {
             skipVotes.clear();
+            timer.stopTimer();
             io.to('gameRoom').emit('roundEnd');
         }
     });
@@ -189,6 +225,7 @@ io.on('connection', function (socket) {
         // displays waiting for
         io.to(playerSocketID).emit('answerReceived', waitingFor);
         if (waitingFor.length == 0) {
+            timer.stopTimer();
             for (var _i = 0, _a = Object.entries(playerAnswers); _i < _a.length; _i++) {
                 var _b = _a[_i], player = _b[0], playerAnswer = _b[1];
                 if (playerAnswer == answer) {
@@ -205,7 +242,9 @@ io.on('connection', function (socket) {
             }
             // filling waitingFor again
             fillWaitingFor();
-            var wrongChoices = Object.values(playerGivenChoices).filter(function (e) { return e !== answer; });
+            var wrongChoices = Object.values(playerGivenChoices)
+                .filter(function (e) { return e !== answer; })
+                .filter(function (e) { return !e.includes('<no answer from'); });
             // show results
             io.to('gameRoom').emit('displayResults', wrongChoices, answer, playerAnswers);
             // after showing results, the clients emit resultsShown
@@ -225,6 +264,7 @@ io.on('connection', function (socket) {
         if (waitingFor.length == 0) {
             // remove the current question
             questions.shift();
+            fillWaitingFor();
             startNewRound();
         }
     });
@@ -280,6 +320,12 @@ function removeFromWaitingFor(username) {
         waitingFor.splice(index, 1);
     }
 }
+function removeFromArray(a, e) {
+    var index = a.indexOf(e);
+    if (index > -1) {
+        a.splice(index, 1);
+    }
+}
 function startNewRound() {
     return __awaiter(this, void 0, void 0, function () {
         var questionObject;
@@ -290,9 +336,9 @@ function startNewRound() {
             category = questionObject.category;
             playerAnswers = {};
             playerGivenChoices = {};
-            fillWaitingFor();
             io.to('gameRoom').emit('hideLogs');
             io.to('gameRoom').emit('initaliseRoundStart', question, category, players);
+            timer.startTimer();
             return [2 /*return*/];
         });
     });

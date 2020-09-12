@@ -72,6 +72,9 @@ body {
             }
         }
         
+        .timerText {
+            display: none;
+        }
     }
 }
 
@@ -80,6 +83,10 @@ body {
 
     .choiceButton {
         min-width: 30%;
+    }
+
+    .answerTimerText {
+        display: none;
     }
 }
 

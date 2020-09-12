@@ -56,10 +56,46 @@ interface questionObject {
     id: number;
 }
 
+class Timer {
+    duration: number;
+    timeLeft: number;
+    t: NodeJS.Timeout;
+
+    constructor(duration: number) {
+        this.duration = duration;
+        this.timeLeft = duration;
+    }
+
+    startTimer() {
+        io.to('gameRoom').emit('timerStart', this.duration);
+
+        this.t = setInterval(() => {
+            this.timeLeft -= 1;
+
+            if (this.timeLeft === 0) {
+
+                for (let p of waitingFor) {
+                    let playerSocketID = players[p].socketID;
+                    io.to(playerSocketID).emit('timeUp');
+                }
+                clearInterval(this.t);
+            } 
+
+            else io.to('gameRoom').emit('timerUpdate', this.timeLeft);
+
+        }, 1000);
+    }
+
+    stopTimer() {
+        clearInterval(this.t);
+        this.timeLeft = this.duration;
+    }
+}
+
 var askedQuestions = {};
 var players: players = {};
 var playerQueue: socketID[] = [];
-var waitingFor: string[];
+var waitingFor: string[] = [];
 var playerGivenChoices: playerChoices = {};
 var question: string;
 var category: string;
@@ -68,6 +104,7 @@ var playerAnswers: playerAnswers = {};
 var skipVotes: Set<string> = new Set<string>();
 var gameInProgress: boolean = false;
 
+const timer = new Timer(60);
 
 // Add the WebSocket handlers
 io.on('connection', function(socket: SocketIO.Socket) {
@@ -111,6 +148,7 @@ io.on('connection', function(socket: SocketIO.Socket) {
 
                 try {
                     removeFromPlayerQueue(playerDetails.socketID);
+                    removeFromWaitingFor(player);
 
                     for (const s of playerQueue) {
                         io.to(s).emit('log', `${userQuit} has quit`);
@@ -125,11 +163,15 @@ io.on('connection', function(socket: SocketIO.Socket) {
             }
         }
 
+        socket.leaveAll();
+
         if (Object.keys(players).length < 2) {
             if (!gameInProgress) hideStartButtonToAdmin();
+            
 
             else {
                 gameInProgress = false;
+                timer.stopTimer();
                 io.to('gameRoom').emit('insufficientPlayers');
                 io.to('gameRoom').emit('returnToLobby');
             }
@@ -145,9 +187,8 @@ io.on('connection', function(socket: SocketIO.Socket) {
         }
 
         gameInProgress = true;
-        startNewRound();
-
         fillWaitingFor();
+        startNewRound();
         // when the players finish answering, they emit questionChoiceSubmitted
     });
 
@@ -171,14 +212,18 @@ io.on('connection', function(socket: SocketIO.Socket) {
         io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
 
         if (waitingFor.length == 0) {
+            timer.stopTimer();
             // combining player given choices with the correct answer in an array
             let choices: string[] = Object.values(playerGivenChoices);
+            choices = choices.filter(choice => !choice.includes('<no answer from'))
             choices.push(answer);
             // transforming all strings to lowercase
             choices = choices.map(x => removePeriod(x.toLowerCase()));
 
             // shuffling order of choices
             shuffle(choices);
+
+            timer.startTimer();
             
             io.to('gameRoom').emit('displayChoices', choices);
 
@@ -197,6 +242,7 @@ io.on('connection', function(socket: SocketIO.Socket) {
         // check all players voted to skip
         if (allPlayersVotedToSkip()) {
             skipVotes.clear();
+            timer.stopTimer();
             io.to('gameRoom').emit('roundEnd');
         }
     })
@@ -215,6 +261,8 @@ io.on('connection', function(socket: SocketIO.Socket) {
         io.to(playerSocketID).emit('answerReceived', waitingFor);
 
         if (waitingFor.length == 0) {
+            timer.stopTimer();
+
             for (const [player, playerAnswer] of Object.entries(playerAnswers)) {
                 if (playerAnswer == answer) {
                     givePoint(player)
@@ -234,7 +282,9 @@ io.on('connection', function(socket: SocketIO.Socket) {
             // filling waitingFor again
             fillWaitingFor();
             
-            let wrongChoices = Object.values(playerGivenChoices).filter(e => { return e !== answer });
+            let wrongChoices = Object.values(playerGivenChoices)
+                                .filter(e => e !== answer)
+                                .filter(e => !e.includes('<no answer from'));
 
             // show results
             io.to('gameRoom').emit('displayResults', wrongChoices, answer, playerAnswers);
@@ -261,6 +311,7 @@ io.on('connection', function(socket: SocketIO.Socket) {
         if (waitingFor.length == 0) {
             // remove the current question
             questions.shift();
+            fillWaitingFor();
             startNewRound();
         }
     })
@@ -315,6 +366,13 @@ function removeFromWaitingFor(username: string) {
     }
 }
 
+function removeFromArray(a: any[], e:any) {
+    const index = a.indexOf(e);
+    if (index > -1) {
+        a.splice(index, 1);
+    }
+}
+
 async function startNewRound() {
     let questionObject = questions[0];
     question = removePeriod(questionObject.question);
@@ -324,10 +382,9 @@ async function startNewRound() {
     playerAnswers = {};
     playerGivenChoices = {};
 
-    fillWaitingFor();
-
     io.to('gameRoom').emit('hideLogs');
     io.to('gameRoom').emit('initaliseRoundStart', question, category, players);
+    timer.startTimer();
 }
 
 function shuffle(a: any[]) {

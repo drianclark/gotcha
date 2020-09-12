@@ -51,11 +51,17 @@ body {
 .questionContainer .skipQuestionRow .skipQuestionButton .skipQuestionCheck {
   display: none; }
 
+.questionContainer .skipQuestionRow .timerText {
+  display: none; }
+
 .choicesContainer {
   display: none; }
 
 .choicesContainer .choiceButton {
   min-width: 30%; }
+
+.choicesContainer .answerTimerText {
+  display: none; }
 
 .waitingForContainer {
   display: none !important;

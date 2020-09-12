@@ -19,6 +19,8 @@ const submitGivenChoiceButton = document.getElementById("submitGivenChoice");
 const choicesContainer = document.getElementById("choicesContainer");
 const resultsContainer = document.getElementById("resultsContainer");
 const resultsDiv = document.getElementById("results");
+const choiceTimerText = document.getElementById("choiceTimerText");
+const answerTimerText = document.getElementById("answerTimerText");
 const skipQuestionButton = document.getElementById("skipQuestionButton") as HTMLInputElement;
 const skipQuestionSpinner = document.getElementById("skipQuestionSpinner");
 const skipQuestionCheck = document.getElementById("skipQuestionCheck");
@@ -29,6 +31,11 @@ const scoresList = document.getElementById("scoresList");
 const notificationsContainer = document.getElementById("notificationsContainer");
 const logs = document.getElementById("logs");
 const logsBox = document.getElementById("logsBox") as HTMLInputElement;
+
+enum gameState {
+    ChoiceSubmission = 1,
+    AnswerSubmission
+}
 
 interface playerDetails {
     socketID: string;
@@ -178,6 +185,23 @@ socket.on('skipVoteReceived', (voter: string) => {
     notificationsContainer.appendChild(skipVoteNotification)
 });
 
+socket.on('timerStart', (timeLeft: string) => {
+    updateTimer(timeLeft);
+    console.log('show timer');
+    showTimer();
+});
+
+socket.on('timerUpdate', (timeLeft: string) => {
+    updateTimer(timeLeft);
+})
+
+socket.on('timeUp', () => {
+    console.log('time is up!');
+    if (submitGivenChoiceButton.style.display != 'none') {
+        socket.emit('questionChoiceSubmitted', username, `<no answer from ${username}>`);
+    }
+});
+
 socket.on('givenChoiceError', (choice: string) => {
     alert(`Duplicate choice: ${choice}`);
 })
@@ -185,6 +209,7 @@ socket.on('givenChoiceError', (choice: string) => {
 socket.on('givenChoiceApproved', () => {
     hide(questionContainer);
     hide(madeUpChoiceForm);
+    hide(choiceTimerText);
 
     show(waitingForContainer, 'flex');
 })
@@ -199,6 +224,7 @@ socket.on('displayChoices', (choices: string[]) => {
     show(questionContainer);
     hide(skipQuestionButton);
     show(choicesContainer);
+    show(answerTimerText);
 
     for (let choice of choices) {
         let row = document.createElement('div');
@@ -215,7 +241,7 @@ socket.on('displayChoices', (choices: string[]) => {
         })
 
         row.appendChild(choiceButton);
-        choicesContainer.appendChild(row);
+        choicesContainer.insertBefore(row, choicesContainer.firstChild);
     };
 })
 
@@ -229,6 +255,7 @@ socket.on('answerReceived', (waitingFor: string[]) => {
 socket.on('displayResults', async (wrongChoices: string[], answer: string, playerAnswers: playerAnswers) => {
     hide(bottomContainer);
     hide(waitingForContainer);
+    hide(answerTimerText);
     show(resultsContainer);
     show(resultsDiv);
 
@@ -253,6 +280,9 @@ socket.on('roundEnd', () => {
 
     // removing choices
     choicesContainer.innerHTML = '';
+
+    choiceTimerText.textContent = '';
+    answerTimerText.textContent = '';
 
     // removing notifications text
     notificationsContainer.innerHTML = '';
@@ -301,6 +331,37 @@ function show (element: HTMLElement, displayParam: string = null) {
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function updateTimer(t: string) {
+    // if in choice submission
+    if (madeUpChoiceForm.style.display != 'none') {
+        choiceTimerText.textContent = t;
+        console.log('updated choice timer: ' + t);
+    }
+
+    // if in answer submission
+    else if (choicesContainer.style.display != 'none') {
+        answerTimerText.textContent = t;
+        console.log('updated answer timer: ' + t);
+
+    }
+}
+
+function showTimer() {
+    // if in choice submission
+    if (madeUpChoiceForm.style.display != 'none') {
+        show(choiceTimerText);
+        console.log('showed choiceTimerText');
+    }
+
+    // if in answer submission
+    else if (choicesContainer.style.display != 'none') {
+        show(answerTimerText);
+        console.log('showed choiceTimerText');
+    }
+
+    console.log('neither timers shown');
 }
 
 async function constructAndShowRoundResults(wrongChoices: string[], answer: string, playerAnswers: playerAnswers) {
