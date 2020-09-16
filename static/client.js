@@ -173,7 +173,6 @@ socket.on('skipVoteReceived', function (voter) {
 });
 socket.on('timerStart', function (timeLeft) {
     updateTimer(timeLeft);
-    console.log('show timer');
     showTimer();
 });
 socket.on('timerUpdate', function (timeLeft) {
@@ -203,7 +202,7 @@ socket.on('displayChoices', function (choices) {
     show(questionContainer);
     hide(skipQuestionButton);
     show(choicesContainer);
-    show(answerTimerText);
+    showTimer();
     var _loop_1 = function (choice) {
         var row = document.createElement('div');
         row.className = 'row justify-content-center mb-2';
@@ -314,6 +313,7 @@ function updateTimer(t) {
 }
 function showTimer() {
     // if in choice submission
+    console.log('showTimer called');
     if (madeUpChoiceForm.style.display != 'none') {
         show(choiceTimerText);
         console.log('showed choiceTimerText');
@@ -321,9 +321,12 @@ function showTimer() {
     // if in answer submission
     else if (choicesContainer.style.display != 'none') {
         show(answerTimerText);
-        console.log('showed choiceTimerText');
+        console.log('showed answerTimerText');
     }
-    console.log('neither timers shown');
+    else {
+        console.log('neither timers shown');
+        console.log(choicesContainer.style);
+    }
 }
 function constructAndShowRoundResults(wrongChoices, answer, playerAnswers) {
     return __awaiter(this, void 0, void 0, function () {

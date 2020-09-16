@@ -188,7 +188,6 @@ socket.on('skipVoteReceived', (voter: string) => {
 
 socket.on('timerStart', (timeLeft: string) => {
     updateTimer(timeLeft);
-    console.log('show timer');
     showTimer();
 });
 
@@ -225,7 +224,7 @@ socket.on('displayChoices', (choices: string[]) => {
     show(questionContainer);
     hide(skipQuestionButton);
     show(choicesContainer);
-    show(answerTimerText);
+    showTimer();
 
     for (let choice of choices) {
         let row = document.createElement('div');
@@ -351,6 +350,7 @@ function updateTimer(t: string) {
 
 function showTimer() {
     // if in choice submission
+    console.log('showTimer called');
     if (madeUpChoiceForm.style.display != 'none') {
         show(choiceTimerText);
         console.log('showed choiceTimerText');
@@ -359,10 +359,13 @@ function showTimer() {
     // if in answer submission
     else if (choicesContainer.style.display != 'none') {
         show(answerTimerText);
-        console.log('showed choiceTimerText');
+        console.log('showed answerTimerText');
     }
 
-    console.log('neither timers shown');
+    else {
+        console.log('neither timers shown');
+        console.log(choicesContainer.style);
+    }
 }
 
 async function constructAndShowRoundResults(wrongChoices: string[], answer: string, playerAnswers: playerAnswers) {

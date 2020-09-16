@@ -223,9 +223,8 @@ io.on('connection', function(socket: SocketIO.Socket) {
             // shuffling order of choices
             shuffle(choices);
 
-            timer.startTimer();
-            
             io.to('gameRoom').emit('displayChoices', choices);
+            timer.startTimer();
 
             // filling waitingFor again
             fillWaitingFor();

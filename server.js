@@ -118,7 +118,7 @@ io.on('connection', function (socket) {
         logForAll(username + ' has joined!');
         playerQueue.push(socket.id);
         updatePlayers();
-        if (Object.keys(players).length >= 1) {
+        if (Object.keys(players).length > 1) {
             showStartButtonToAdmin();
         }
     });
@@ -197,8 +197,8 @@ io.on('connection', function (socket) {
             choices = choices.map(function (x) { return removePeriod(x.toLowerCase()); });
             // shuffling order of choices
             shuffle(choices);
-            timer.startTimer();
             io.to('gameRoom').emit('displayChoices', choices);
+            timer.startTimer();
             // filling waitingFor again
             fillWaitingFor();
         }
