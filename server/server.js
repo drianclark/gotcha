@@ -1,4 +1,3 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -35,7 +34,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-exports.__esModule = true;
 var express = require('express');
 var request = require('node-fetch');
 var http = require('http');
@@ -105,7 +103,6 @@ io.on('connection', function (socket) {
     socket.on('join', function (username) {
         // check if username doesn't exist yet
         if (username in players) {
-            console.log('error joining');
             io.to(socket.id).emit('joinFail', 'Username already exists');
             return;
         }
@@ -269,8 +266,6 @@ io.on('connection', function (socket) {
         }
     });
 });
-// io.sockets.emit sends message to all sockets;
-// socket.on only responds to the one socket that emitted something
 function fetchQuestions() {
     return __awaiter(this, void 0, void 0, function () {
         var db, query;
@@ -293,7 +288,7 @@ function fetchQuestions() {
     });
 }
 function updatePlayers() {
-    io.to('gameRoom').emit('playersList', Object.keys(players));
+    io.to('gameRoom').emit('updatePlayers', players);
 }
 function showStartButtonToAdmin() {
     try {

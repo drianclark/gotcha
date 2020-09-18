@@ -124,7 +124,7 @@ socket.on('joinSuccess', () => {
     show(logs);
 });
 
-socket.on('playersList', (players: string[]) => {
+socket.on('updatePlayers', (players: string[]) => {
     lobbyPlayersList.textContent = '';
 
     for (let player of players) {

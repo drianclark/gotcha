@@ -1,5 +1,3 @@
-import { dir } from "console";
-
 const express = require('express');
 const request = require('node-fetch');
 const http = require('http');
@@ -114,7 +112,6 @@ io.on('connection', function(socket: SocketIO.Socket) {
         // check if username doesn't exist yet
 
         if (username in players) {
-            console.log('error joining');
             io.to(socket.id).emit('joinFail', 'Username already exists');
             return;
         }
@@ -317,9 +314,6 @@ io.on('connection', function(socket: SocketIO.Socket) {
 
 });
 
-// io.sockets.emit sends message to all sockets;
-// socket.on only responds to the one socket that emitted something
-
 async function fetchQuestions() {
     let db = await sqlite.open({
         filename: './db/gotcha.db',
@@ -334,7 +328,7 @@ async function fetchQuestions() {
 
 
 function updatePlayers() {
-    io.to('gameRoom').emit('playersList', Object.keys(players));
+    io.to('gameRoom').emit('updatePlayers', players);
 }
 
 function showStartButtonToAdmin() {

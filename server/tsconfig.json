@@ -7,6 +7,5 @@
 
     "files": [
         "server.ts",
-        "static/client.ts"
     ]
 }

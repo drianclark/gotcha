@@ -1,0 +1,61 @@
+body {
+  font-family: "Oswald", sans-serif; }
+
+.rootContainer {
+  height: 100vh; }
+
+.usernameForm {
+  height: 100vh;
+  margin-top: -5em; }
+
+.usernameForm h1 {
+  font-family: "Oswald", sans-serif;
+  color: dodgerblue;
+  font-size: 10em;
+  margin-bottom: 0.2em; }
+
+.usernameForm .usernameField {
+  text-align: center;
+  max-width: 40%;
+  min-width: 300px; }
+
+.lobbyContainer ul {
+  list-style-type: none;
+  margin-top: 2em;
+  padding-left: 0.5em; }
+
+.lobbyContainer .logs > .logsBox {
+  width: 100%; }
+
+.questionContainer .madeUpChoiceForm textarea {
+  max-width: 700px; }
+
+.questionContainer .skipQuestionRow .skipQuestionButton {
+  white-space: normal; }
+
+.choicesContainer .choiceButton {
+  min-width: 30%; }
+
+.waitingForContainer {
+  display: none !important;
+  height: 100vh; }
+
+.resultsContainer .choiceRow {
+  animation-name: fadeIn;
+  animation-duration: 1s;
+  animation-timing-function: ease-in-out; }
+
+.resultsContainer .choiceRow > .playerAnswersCol {
+  text-align: right; }
+
+.resultsContainer .choiceRow > .playerAnswersCol > p {
+  margin-bottom: 0; }
+
+.resultsContainer .choiceRow .choiceCard > button {
+  min-width: 30%; }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0; }
+  to {
+    opacity: 100; } }
