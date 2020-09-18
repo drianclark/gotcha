@@ -22,12 +22,14 @@ function Lobby(props: any) {
     var [playersList, setPlayersList] = useState(
         Object.keys(props.players).map((playerName) => <li>{playerName}</li>)
     );
-    var [logs, setLogs] = useState('')
+    var [logs, setLogs] = useState('');
 
     useEffect(() => {
         socket.on('updatePlayers', (players: players) => {
             props.setPlayers({ players });
-            if (Object.keys(players).length > 1) setReadyToStart(true);
+            if (Object.keys(players).length > 1) {
+                setReadyToStart(true);
+            } else setReadyToStart(false);
 
             setPlayersList(
                 Object.keys(players).map((playerName) => (
