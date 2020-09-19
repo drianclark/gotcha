@@ -106,7 +106,7 @@ io.on('connection', function (socket) {
             io.to(socket.id).emit('joinFail', 'Username already exists');
             return;
         }
-        io.to(socket.id).emit('joinSuccess');
+        socket.emit('joinSuccess');
         socket.join('gameRoom');
         players[username] = {
             score: 0,
@@ -293,7 +293,7 @@ function updatePlayers() {
 function showStartButtonToAdmin() {
     try {
         var admin = playerQueue[0];
-        io.to(admin).emit('showStartButton');
+        io.to(admin).emit('assignAdmin');
     }
     catch (e) {
         console.log(e);

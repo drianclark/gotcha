@@ -116,7 +116,7 @@ io.on('connection', function(socket: SocketIO.Socket) {
             return;
         }
 
-        io.to(socket.id).emit('joinSuccess');
+        socket.emit('joinSuccess');
         socket.join('gameRoom');
 
         players[username] = {
@@ -334,7 +334,7 @@ function updatePlayers() {
 function showStartButtonToAdmin() {
     try {
         let admin: socketID = playerQueue[0];
-        io.to(admin).emit('showStartButton');
+        io.to(admin).emit('assignAdmin');
     } catch (e) {
     console.log(e);
     }

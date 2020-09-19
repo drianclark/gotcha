@@ -6,6 +6,15 @@ import Button from 'react-bootstrap/Button';
 
 declare var filterXSS: any;
 
+enum GamePhase {
+    Login = 0,
+    Lobby,
+    Question,
+    Answer,
+    Results,
+    End,
+}
+
 interface playerDetails {
     socketID: string;
     score: number;
@@ -23,6 +32,7 @@ function Lobby(props: any) {
         Object.keys(props.players).map((playerName) => <li>{playerName}</li>)
     );
     var [logs, setLogs] = useState('');
+    var [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         socket.on('updatePlayers', (players: players) => {
@@ -42,7 +52,18 @@ function Lobby(props: any) {
             console.log('got message ' + message);
             setLogs(logs + message + '\n')
         })
+
+        socket.on('assignAdmin', () => {
+            setIsAdmin(true);
+        })
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    function startGame() {
+        props.setGamePhase(GamePhase.Question);
+        socket.emit('startRound');
+    }
 
     return (
         <Container className="lobbyContainer mt-5" id="lobbyContainer">
@@ -51,11 +72,12 @@ function Lobby(props: any) {
                 {playersList}
             </ul>
 
-            {readyToStart && (
+            {readyToStart && isAdmin &&(
                 <Button
                     id="startGameButton"
                     variant="outline-success"
                     className="mt-5 startGameButton"
+                    onClick={startGame}
                 >
                     Start Game!
                 </Button>
