@@ -54,7 +54,7 @@ function Login(props: any) {
                         className="usernameField form-control mx-auto"
                         value={username}
                         placeholder="Enter your username"
-                        onChange={(e) => setUsername(e.target.value)}
+                        onChange={e => setUsername(e.target.value)}
                     />
                     <Button
                         type="button"

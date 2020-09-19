@@ -142,9 +142,7 @@ io.on('connection', function (socket) {
         }
         socket.leaveAll();
         if (Object.keys(players).length < 2) {
-            if (!gameInProgress)
-                hideStartButtonToAdmin();
-            else {
+            if (gameInProgress) {
                 gameInProgress = false;
                 timer.stopTimer();
                 io.to('gameRoom').emit('insufficientPlayers');
@@ -164,6 +162,9 @@ io.on('connection', function (socket) {
                     _a.sent();
                     _a.label = 2;
                 case 2:
+                    if (gameInProgress === false) {
+                        io.to('gameRoom').emit('gameStart');
+                    }
                     gameInProgress = true;
                     fillWaitingFor();
                     startNewRound();
@@ -272,7 +273,7 @@ function fetchQuestions() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, sqlite.open({
-                        filename: './db/gotcha.db',
+                        filename: '../db/gotcha.db',
                         driver: sqlite3.Database
                     })];
                 case 1:
@@ -298,10 +299,6 @@ function showStartButtonToAdmin() {
     catch (e) {
         console.log(e);
     }
-}
-function hideStartButtonToAdmin() {
-    var admin = playerQueue[0];
-    io.to(admin).emit('hideStartButton');
 }
 function removeFromPlayerQueue(id) {
     var index = playerQueue.indexOf(id);
@@ -332,7 +329,7 @@ function startNewRound() {
             playerAnswers = {};
             playerGivenChoices = {};
             io.to('gameRoom').emit('hideLogs');
-            io.to('gameRoom').emit('initaliseRoundStart', question, category, players);
+            io.to('gameRoom').emit('initialiseRoundStart', question, category, players);
             timer.startTimer();
             return [2 /*return*/];
         });

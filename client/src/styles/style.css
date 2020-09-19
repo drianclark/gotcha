@@ -27,7 +27,11 @@ body {
 .lobbyContainer .logs > .logsBox {
   width: 100%; }
 
+.questionContainer .madeUpChoiceForm {
+  display: flex; }
+
 .questionContainer .madeUpChoiceForm textarea {
+  min-width: 100%;
   max-width: 700px; }
 
 .questionContainer .skipQuestionRow .skipQuestionButton {
@@ -53,6 +57,35 @@ body {
 
 .resultsContainer .choiceRow .choiceCard > button {
   min-width: 30%; }
+
+.baseTimer {
+  position: relative;
+  height: 7rem;
+  width: 7rem;
+  left: 50%;
+  transform: translateX(-50%); }
+
+.baseTimerCircle {
+  fill: none;
+  stroke: none; }
+
+.baseTimerPathElapsed {
+  stroke-width: 4px;
+  stroke: #4e4e4e; }
+
+.baseTimerLabel {
+  position: absolute;
+  /* Size should match the parent container */
+  width: 7rem;
+  height: 7rem;
+  /* Keep the label aligned to the top */
+  top: 0;
+  /* Create a flexible box that centers content vertically and horizontally */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Sort of an arbitrary number; adjust to your liking */
+  font-size: 2rem; }
 
 @keyframes fadeIn {
   from {

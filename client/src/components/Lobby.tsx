@@ -48,20 +48,23 @@ function Lobby(props: any) {
             );
         });
 
-        socket.on('log', (message:string) => {
+        socket.on('log', (message: string) => {
             console.log('got message ' + message);
-            setLogs(logs + message + '\n')
-        })
+            setLogs(logs + message + '\n');
+        });
 
         socket.on('assignAdmin', () => {
             setIsAdmin(true);
-        })
+        });
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        socket.on('gameStart', () => {
+            props.setGamePhase(GamePhase.Question)
+        });
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     function startGame() {
-        props.setGamePhase(GamePhase.Question);
         socket.emit('startRound');
     }
 
@@ -72,7 +75,7 @@ function Lobby(props: any) {
                 {playersList}
             </ul>
 
-            {readyToStart && isAdmin &&(
+            {readyToStart && isAdmin && (
                 <Button
                     id="startGameButton"
                     variant="outline-success"

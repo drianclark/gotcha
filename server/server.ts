@@ -163,10 +163,7 @@ io.on('connection', function(socket: SocketIO.Socket) {
         socket.leaveAll();
 
         if (Object.keys(players).length < 2) {
-            if (!gameInProgress) hideStartButtonToAdmin();
-            
-
-            else {
+            if (gameInProgress) {
                 gameInProgress = false;
                 timer.stopTimer();
                 io.to('gameRoom').emit('insufficientPlayers');
@@ -183,7 +180,11 @@ io.on('connection', function(socket: SocketIO.Socket) {
             await fetchQuestions();
         }
 
+        if (gameInProgress === false){
+            io.to('gameRoom').emit('gameStart');
+        } 
         gameInProgress = true;
+
         fillWaitingFor();
         startNewRound();
         // when the players finish answering, they emit questionChoiceSubmitted
@@ -316,7 +317,7 @@ io.on('connection', function(socket: SocketIO.Socket) {
 
 async function fetchQuestions() {
     let db = await sqlite.open({
-        filename: './db/gotcha.db',
+        filename: '../db/gotcha.db',
         driver: sqlite3.Database
     });
 
@@ -338,11 +339,6 @@ function showStartButtonToAdmin() {
     } catch (e) {
     console.log(e);
     }
-}
-
-function hideStartButtonToAdmin() {
-    let admin: socketID = playerQueue[0];
-    io.to(admin).emit('hideStartButton')
 }
 
 function removeFromPlayerQueue(id: socketID) {
@@ -376,7 +372,7 @@ async function startNewRound() {
     playerGivenChoices = {};
 
     io.to('gameRoom').emit('hideLogs');
-    io.to('gameRoom').emit('initaliseRoundStart', question, category, players);
+    io.to('gameRoom').emit('initialiseRoundStart', question, category, players);
     timer.startTimer();
 }
 
