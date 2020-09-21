@@ -3,17 +3,9 @@ import { socket } from '../socket';
 import FormControl from 'react-bootstrap/FormControl';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import {GamePhase} from '../interfaces/interfaces'
 
 declare var filterXSS: any;
-
-enum GamePhase {
-    Login = 0,
-    Lobby,
-    Question,
-    Answer,
-    Results,
-    End,
-}
 
 function Login(props: any) {
     var [username, setUsername] = useState('');
@@ -23,9 +15,9 @@ function Login(props: any) {
             alert(errorMessage);
         });
 
-        socket.on('joinSuccess', () => {
-            console.log('successfully joined!');
+        socket.on('joinSuccess', (submittedUsername: string) => {
             props.setGamePhase(GamePhase.Lobby);
+            props.setUsername(submittedUsername);
         });
 
         // eslint-disable-next-line react-hooks/exhaustive-deps

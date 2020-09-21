@@ -2,7 +2,7 @@ $primary-font: 'Oswald', sans-serif;
 $secondary-font: 'Raleway', sans-serif;
 
 body {
-    font-family: $primary-font;    
+    font-family: $primary-font;
 }
 
 .rootContainer {
@@ -28,8 +28,6 @@ body {
 }
 
 .lobbyContainer {
-    
-
     ul {
         list-style-type: none;
         margin-top: 2em;
@@ -37,8 +35,6 @@ body {
     }
 
     .logs {
-        
-
         > .logsBox {
             width: 100%;
         }
@@ -73,8 +69,6 @@ body {
 }
 
 .resultsContainer {
-    
-    
     .choiceRow {
         animation-name: fadeIn;
         animation-duration: 1s;
@@ -100,38 +94,49 @@ body {
     width: 7rem;
     left: 50%;
     transform: translateX(-50%);
-}
 
-.baseTimerCircle {
-    fill: none;
-    stroke: none;
-}
+    & .baseTimerSVG {
+        transform: scaleX(-1);
 
-.baseTimerPathElapsed {
-    stroke-width: 4px;
-    stroke: #4e4e4e;
-}
+        & .baseTimerCircle {
+            fill: none;
+            stroke: none;
 
-.baseTimerLabel {
-    position: absolute;
-      
-    /* Size should match the parent container */
-    width: 7rem;
-    height: 7rem;
-      
-    /* Keep the label aligned to the top */
-    top: 0;
-      
-    /* Create a flexible box that centers content vertically and horizontally */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    
-    /* Sort of an arbitrary number; adjust to your liking */
-    font-size: 2rem;
+            & .baseTimerPathElapsed {
+                stroke-width: 6px;
+                stroke: #4e4e4e;
+            }
+
+            & .baseTimerPathRemaining {
+                stroke: dodgerblue;
+                stroke-width: 6px;
+                stroke-linecap: round;
+                transition: 1s linear all;
+                transform: rotate(90deg);
+                transform-origin: center;
+            }
+        }
+    }
+
+    .baseTimerLabel {
+        position: absolute;
+
+        /* Size should match the parent container */
+        width: 7rem;
+        height: 7rem;
+
+        /* Keep the label aligned to the top */
+        top: 0;
+
+        /* Create a flexible box that centers content vertically and horizontally */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        /* Sort of an arbitrary number; adjust to your liking */
+        font-size: 2rem;
+    }
 }
-    
-    
 
 @keyframes fadeIn {
     from {

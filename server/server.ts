@@ -1,3 +1,5 @@
+import { start } from "repl";
+
 const express = require('express');
 const request = require('node-fetch');
 const http = require('http');
@@ -43,7 +45,7 @@ interface playerChoices {
 }
 
 interface playerAnswers {
-    [username: string]: string;
+    [answer: string]: string[];
 }
 
 
@@ -116,7 +118,7 @@ io.on('connection', function(socket: SocketIO.Socket) {
             return;
         }
 
-        socket.emit('joinSuccess');
+        socket.emit('joinSuccess', username);
         socket.join('gameRoom');
 
         players[username] = {
@@ -180,9 +182,6 @@ io.on('connection', function(socket: SocketIO.Socket) {
             await fetchQuestions();
         }
 
-        if (gameInProgress === false){
-            io.to('gameRoom').emit('gameStart');
-        } 
         gameInProgress = true;
 
         fillWaitingFor();
@@ -193,15 +192,13 @@ io.on('connection', function(socket: SocketIO.Socket) {
     // after a fake answer choice has been submitted
     socket.on('questionChoiceSubmitted', (username: string, choice: string) => {
         // handle duplicate choice
-        let playerSocketID = socket.id;
-
         if (Object.values(playerGivenChoices).includes(choice) || choice == answer) {
-            io.to(playerSocketID).emit('givenChoiceError', choice);
+            io.to(socket.id).emit('givenChoiceError', `duplicate choice: ${choice}`);
 
             return;
         }
 
-        io.to(playerSocketID).emit('givenChoiceApproved', choice);
+        io.to(socket.id).emit('givenChoiceApproved', choice);
 
         playerGivenChoices[username] = choice;
 
@@ -215,6 +212,12 @@ io.on('connection', function(socket: SocketIO.Socket) {
             let choices: string[] = Object.values(playerGivenChoices);
             choices = choices.filter(choice => !choice.includes('<no answer from'))
             choices.push(answer);
+
+            // adding an entry for each choice to playerAnswers
+            for (const choice of choices) {
+                playerAnswers[choice] = [];
+            }
+
             // transforming all strings to lowercase
             choices = choices.map(x => removePeriod(x.toLowerCase()));
 
@@ -230,9 +233,9 @@ io.on('connection', function(socket: SocketIO.Socket) {
     })
 
     socket.on('skipVoteSubmitted', (username: string) => {
-        let playerSocketID = socket.id;
         // add user to array of skipVotes
         skipVotes.add(username);
+        console.log(username + ' voted to skip');
 
         io.to('gameRoom').emit('skipVoteReceived', username);
 
@@ -240,40 +243,42 @@ io.on('connection', function(socket: SocketIO.Socket) {
         if (allPlayersVotedToSkip()) {
             skipVotes.clear();
             timer.stopTimer();
-            io.to('gameRoom').emit('roundEnd');
+            startNewRound();
+            // io.to('gameRoom').emit('initialiseRoundStart');
+            // io.to('gameRoom').emit('roundEnd');
         }
     })
 
     // after an answer has been submitted
     socket.on('answerSubmitted', (username: string, userAnswer: string) => {
-        playerAnswers[username] = userAnswer;
-        let playerSocketID = socket.id;
 
-
+        playerAnswers[userAnswer].push(username);
         removeFromWaitingFor(username);
 
         // updates waiting for in all clients
-        io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
         // displays waiting for
-        io.to(playerSocketID).emit('answerReceived', waitingFor);
+        io.to(socket.id).emit('answerReceived');
+        io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
 
         if (waitingFor.length == 0) {
             timer.stopTimer();
 
-            for (const [player, playerAnswer] of Object.entries(playerAnswers)) {
-                if (playerAnswer == answer) {
-                    givePoint(player)
+            // give point to players who answered correctly
+            if (answer in playerAnswers) {
+                for (const player of playerAnswers[answer]) {
+                    givePoint(player);
                 }
-
-                else {
-                    // if the player's answer is not their own submitted fake answer
-                    // give a point to the player who made up that answer
-                    if (playerAnswer != playerGivenChoices[username]) {
-                        let gotBy = getPlayerWhoSubmittedFakeAnswer(playerAnswer);
-                        givePoint(gotBy);
+            }
+            
+            // give point to players who fooled other players
+            // based on the number of players they fooled
+            for (const [playerAnswer, players] of Object.entries(playerAnswers)) {
+                if (playerAnswer !== answer) {
+                    let submittedBy = getPlayerWhoSubmittedFakeAnswer(playerAnswer);
+                    for (const player of players) {
+                        if (player !== submittedBy) givePoint(submittedBy)
                     }
                 }
-
             }
 
             // filling waitingFor again
@@ -294,25 +299,11 @@ io.on('connection', function(socket: SocketIO.Socket) {
     socket.on('resultsShown', (username: string) => {
         removeFromWaitingFor(username);
 
-        if (waitingFor.length == 0) {
-            fillWaitingFor();
-            io.to('gameRoom').emit('updateScores', players);
-            io.to('gameRoom').emit('roundEnd', players);
-        }
-    });
-
-    // after clients are done cleaning up
-    socket.on('cleanupDone', (username: string) => {
-        removeFromWaitingFor(username);
-
-        if (waitingFor.length == 0) {
-            // remove the current question
-            questions.shift();
+        if (waitingFor.length === 0) {
             fillWaitingFor();
             startNewRound();
         }
-    })
-
+    });
 });
 
 async function fetchQuestions() {
@@ -363,6 +354,7 @@ function removeFromArray(a: any[], e:any) {
 }
 
 async function startNewRound() {
+    questions.shift();
     let questionObject = questions[0];
     question = removePeriod(questionObject.question);
     answer = questionObject.answer.trim().toLowerCase();
@@ -371,7 +363,7 @@ async function startNewRound() {
     playerAnswers = {};
     playerGivenChoices = {};
 
-    io.to('gameRoom').emit('hideLogs');
+    // io.to('gameRoom').emit('hideLogs');
     io.to('gameRoom').emit('initialiseRoundStart', question, category, players);
     timer.startTimer();
 }

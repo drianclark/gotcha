@@ -65,15 +65,26 @@ body {
   left: 50%;
   transform: translateX(-50%); }
 
-.baseTimerCircle {
+.baseTimer .baseTimerSVG {
+  transform: scaleX(-1); }
+
+.baseTimer .baseTimerSVG .baseTimerCircle {
   fill: none;
   stroke: none; }
 
-.baseTimerPathElapsed {
-  stroke-width: 4px;
+.baseTimer .baseTimerSVG .baseTimerCircle .baseTimerPathElapsed {
+  stroke-width: 6px;
   stroke: #4e4e4e; }
 
-.baseTimerLabel {
+.baseTimer .baseTimerSVG .baseTimerCircle .baseTimerPathRemaining {
+  stroke: dodgerblue;
+  stroke-width: 6px;
+  stroke-linecap: round;
+  transition: 1s linear all;
+  transform: rotate(90deg);
+  transform-origin: center; }
+
+.baseTimer .baseTimerLabel {
   position: absolute;
   /* Size should match the parent container */
   width: 7rem;

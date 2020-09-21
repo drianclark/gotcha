@@ -3,26 +3,9 @@ import { socket } from '../socket';
 import Container from 'react-bootstrap/Container';
 import FormControl from 'react-bootstrap/FormControl';
 import Button from 'react-bootstrap/Button';
+import {IPlayers} from '../interfaces/interfaces'
 
 declare var filterXSS: any;
-
-enum GamePhase {
-    Login = 0,
-    Lobby,
-    Question,
-    Answer,
-    Results,
-    End,
-}
-
-interface playerDetails {
-    socketID: string;
-    score: number;
-}
-
-interface players {
-    [username: string]: playerDetails;
-}
 
 function Lobby(props: any) {
     var [readyToStart, setReadyToStart] = useState(
@@ -35,7 +18,7 @@ function Lobby(props: any) {
     var [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
-        socket.on('updatePlayers', (players: players) => {
+        socket.on('updatePlayers', (players: IPlayers) => {
             props.setPlayers({ players });
             if (Object.keys(players).length > 1) {
                 setReadyToStart(true);
@@ -57,9 +40,9 @@ function Lobby(props: any) {
             setIsAdmin(true);
         });
 
-        socket.on('gameStart', () => {
-            props.setGamePhase(GamePhase.Question)
-        });
+        // socket.on('gameStart', () => {
+        //     props.setGamePhase(GamePhase.Question)
+        // });
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
