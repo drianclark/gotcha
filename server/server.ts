@@ -18,7 +18,11 @@ const sqlite = require('sqlite');
 
 const PORT = process.env.PORT || 5000;
 app.set('port', PORT);
-app.use('/static', express.static(__dirname + '/static'));
+
+app.use(express.static(path.resolve(__dirname, '../client/build')));
+app.get("/", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "../client/build/index.html"));
+    });
 
 // Starts the server.
 server.listen(PORT, function () {

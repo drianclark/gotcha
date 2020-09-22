@@ -47,7 +47,10 @@ var sqlite3 = require('sqlite3').verbose();
 var sqlite = require('sqlite');
 var PORT = process.env.PORT || 5000;
 app.set('port', PORT);
-app.use('/static', express.static(__dirname + '/static'));
+app.use(express.static(path.resolve(__dirname, '../client/build')));
+app.get("/", function (req, res) {
+    res.sendFile(path.resolve(__dirname, "../client/build/index.html"));
+});
 // Starts the server.
 server.listen(PORT, function () {
     console.log("Starting server on port " + PORT);
@@ -80,6 +83,8 @@ var Timer = /** @class */ (function () {
     };
     return Timer;
 }());
+var numberOfRounds = 10;
+var currentRound = 0;
 var questions = [];
 var players = {};
 var playerQueue = [];
@@ -143,6 +148,22 @@ io.on('connection', function (socket) {
         }
         updatePlayers();
     });
+    socket.on('startGame', function (submittedNumberOfRounds) { return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    numberOfRounds = submittedNumberOfRounds;
+                    currentRound = 0;
+                    gameInProgress = true;
+                    return [4 /*yield*/, fetchQuestions()];
+                case 1:
+                    _a.sent();
+                    fillWaitingFor();
+                    startNewRound();
+                    return [2 /*return*/];
+            }
+        });
+    }); });
     socket.on('startRound', function () { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -153,7 +174,6 @@ io.on('connection', function (socket) {
                     _a.sent();
                     _a.label = 2;
                 case 2:
-                    gameInProgress = true;
                     fillWaitingFor();
                     startNewRound();
                     return [2 /*return*/];
@@ -241,8 +261,14 @@ io.on('connection', function (socket) {
     socket.on('resultsShown', function (username) {
         removeFromWaitingFor(username);
         if (waitingFor.length === 0) {
-            fillWaitingFor();
-            startNewRound();
+            console.log('next round is ' + (currentRound + 1));
+            if (currentRound === numberOfRounds) {
+                endGame();
+            }
+            else {
+                fillWaitingFor();
+                startNewRound();
+            }
         }
     });
 });
@@ -301,6 +327,8 @@ function startNewRound() {
     return __awaiter(this, void 0, void 0, function () {
         var questionObject;
         return __generator(this, function (_a) {
+            currentRound += 1;
+            console.log('starting round ' + currentRound);
             questions.shift();
             questionObject = questions[0];
             question = removePeriod(questionObject.question);
@@ -313,6 +341,20 @@ function startNewRound() {
             return [2 /*return*/];
         });
     });
+}
+function endGame() {
+    var maxScore = -1;
+    // getting the max score
+    for (var _i = 0, _a = Object.values(players); _i < _a.length; _i++) {
+        var playerDetails = _a[_i];
+        if (playerDetails.score > maxScore)
+            maxScore = playerDetails.score;
+    }
+    var winners = Object.keys(players).filter(function (player) {
+        return players[player].score === maxScore;
+    });
+    io.to('gameRoom').emit('endGame', winners, players);
+    console.log('emitted endGame');
 }
 function shuffle(a) {
     var j, x, i;
