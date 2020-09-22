@@ -6,6 +6,6 @@
     },
 
     "files": [
-        "server.ts",
+        "server/server.ts",
     ]
 }

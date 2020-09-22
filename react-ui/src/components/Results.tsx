@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {socket} from '../socket'
 import Container from 'react-bootstrap/Container';
-import ResultRow from '../components/ResultRow';
+import ResultRow from './ResultRow';
 import { IPlayerAnswers } from '../interfaces/interfaces';
 
 interface IResultsProps {
