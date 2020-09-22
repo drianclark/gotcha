@@ -7,7 +7,7 @@
     "start": "node server",
     "dev": "concurrently \"nodemon server.js\" \"npx tsc\"",
     "test": "jest",
-    "build": "cd react-ui && npm run build"
+    "build": "cd react-ui && npm install && npm run build"
   },
   "author": "Adrian David",
   "license": "MIT",
