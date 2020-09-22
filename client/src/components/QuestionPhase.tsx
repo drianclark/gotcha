@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 import FormControl from 'react-bootstrap/Form';
 import Form from 'react-bootstrap/Form';
 import Timer from './Timer'
-import {GamePhase, IPlayers} from '../interfaces/interfaces'
+import {GamePhase} from '../interfaces/interfaces'
 
 declare var filterXSS: any;
 
@@ -21,8 +21,7 @@ function QuestionPhase(props: IQuestionPhaseProps) {
     var [skipVoteReceived, setSkipVoteReceived] = useState(false);
 
     useEffect(() => {
-
-        socket.on('skipVoteReceived', (username: string) => {
+        socket.once('skipVoteReceived', (username: string) => {
             if (username === props.username) {
                 setSkipVoteLoading(false);
                 setSkipVoteReceived(true);
@@ -33,9 +32,20 @@ function QuestionPhase(props: IQuestionPhaseProps) {
             alert(error);
         })
 
-        socket.on('givenChoiceApproved', (choice: string) => {
+        socket.once('givenChoiceApproved', (choice: string) => {
             props.setGamePhase(GamePhase.Wait)
+            console.log('got givenChoiceApproved');
         })
+
+        socket.on('timeUp', () => {
+            socket.emit('questionChoiceSubmitted', props.username, `<no answer from ${props.username}>`);
+        })
+
+        return function cleanup() {
+            socket.off('timeUp');
+            socket.off('givenChoiceError');
+
+        }
         
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

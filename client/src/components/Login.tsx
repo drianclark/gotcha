@@ -15,7 +15,7 @@ function Login(props: any) {
             alert(errorMessage);
         });
 
-        socket.on('joinSuccess', (submittedUsername: string) => {
+        socket.once('joinSuccess', (submittedUsername: string) => {
             props.setGamePhase(GamePhase.Lobby);
             props.setUsername(submittedUsername);
         });

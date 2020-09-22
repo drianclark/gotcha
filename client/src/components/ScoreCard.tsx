@@ -10,7 +10,7 @@ interface IScoreCardProps {
 
 function ScoreCard(props: IScoreCardProps) {
     var playerList = Object.keys(props.players).map(player => (
-        <ListGroupItem className='text-secondary py-1'>
+        <ListGroupItem key={player} className='text-secondary py-1'>
             {player}: {props.players[player].score}
         </ListGroupItem>
     ))

@@ -9,6 +9,11 @@ function WaitingPhase() {
         socket.on('updatedWaitingFor', (waitingFor: string[]) => {
             setWaitingForText(waitingFor.join(', '));
         });
+
+        return function cleanup() {
+            socket.off('updatedWaitingFor');
+        }
+
     }, []);
 
     return (

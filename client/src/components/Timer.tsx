@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { socket } from '../socket';
 
 function Timer(props: any) {
-    var [duration, setDuration] = useState('60')
+    var [duration, setDuration] = useState('60');
     var [timeLeft, setTimeLeft] = useState('60');
-    var [dashArray, setDashArray] = useState('283, 283')
+    var [dashArray, setDashArray] = useState('283, 283');
 
-    useEffect(() => {
-        socket.on('timerStart', (duration: string) => {
+    useLayoutEffect(() => {
+        socket.once('timerStart', (duration: string) => {
             setDuration(duration);
             setTimeLeft(duration);
         });
@@ -15,6 +15,10 @@ function Timer(props: any) {
         socket.on('timerUpdate', (timeLeft: string) => {
             setTimeLeft(timeLeft);
         });
+
+        return function cleanup() {
+            socket.off('timerUpdate')
+        }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

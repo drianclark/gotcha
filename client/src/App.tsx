@@ -12,6 +12,7 @@ import WaitingPhase from './components/WaitingPhase';
 import Results from './components/Results';
 import ScoreCard from './components/ScoreCard';
 import { GamePhase, IPlayers, IPlayerAnswers } from './interfaces/interfaces';
+import EndPhase from './components/EndPhase';
 
 function App() {
     var [gamePhase, setGamePhase] = useState(GamePhase.Login);
@@ -23,15 +24,17 @@ function App() {
     var [wrongChoices, setWrongChoices] = useState(['']);
     var [answer, setAnswer] = useState('');
     var [playerAnswers, setPlayerAnswers] = useState({});
+    var [winners, setWinners] = useState(['']);
 
     useEffect(() => {
         socket.on(
             'initialiseRoundStart',
             (question: string, category: string, players: IPlayers) => {
-                setGamePhase(GamePhase.Question);
                 setQuestion(question);
                 setCategory(category);
                 setPlayers(players);
+                setGamePhase(GamePhase.Question);
+                
             }
         );
 
@@ -53,6 +56,12 @@ function App() {
                 setGamePhase(GamePhase.Results);
             }
         );
+
+        socket.on('endGame', (winners: string[], players: IPlayers) => {
+            setWinners(winners);
+            setPlayers(players);
+            setGamePhase(GamePhase.End);
+        })
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -109,6 +118,14 @@ function App() {
                     answer={answer}
                     playerAnswers={playerAnswers}
                     username={username}
+                />
+            )}
+
+            {gamePhase === GamePhase.End && (
+                <EndPhase
+                    winners={winners}
+                    players={players}
+                    setGamePhase={setGamePhase}
                 />
             )}
         </Container>

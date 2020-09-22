@@ -3,7 +3,8 @@ import { socket } from '../socket';
 import Container from 'react-bootstrap/Container';
 import FormControl from 'react-bootstrap/FormControl';
 import Button from 'react-bootstrap/Button';
-import {IPlayers} from '../interfaces/interfaces'
+import { IPlayers } from '../interfaces/interfaces';
+import GameOptions from './GameOptions';
 
 declare var filterXSS: any;
 
@@ -11,11 +12,10 @@ function Lobby(props: any) {
     var [readyToStart, setReadyToStart] = useState(
         Object.keys(props.players).length > 1
     );
-    var [playersList, setPlayersList] = useState(
-        Object.keys(props.players).map((playerName) => <li>{playerName}</li>)
-    );
+    var [playersList, setPlayersList]:any = useState();
     var [logs, setLogs] = useState('');
     var [isAdmin, setIsAdmin] = useState(false);
+    var [numberOfRounds, setNumberOfRounds] = useState(1);
 
     useEffect(() => {
         socket.on('updatePlayers', (players: IPlayers) => {
@@ -32,23 +32,22 @@ function Lobby(props: any) {
         });
 
         socket.on('log', (message: string) => {
-            console.log('got message ' + message);
             setLogs(logs + message + '\n');
         });
 
-        socket.on('assignAdmin', () => {
+        socket.once('assignAdmin', () => {
             setIsAdmin(true);
         });
 
-        // socket.on('gameStart', () => {
-        //     props.setGamePhase(GamePhase.Question)
-        // });
+        return function cleanup() {
+            socket.off('log');
+        };
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     function startGame() {
-        socket.emit('startRound');
+        socket.emit('startGame', numberOfRounds);
     }
 
     return (
@@ -68,6 +67,12 @@ function Lobby(props: any) {
                     Start Game!
                 </Button>
             )}
+
+            <GameOptions
+                key={numberOfRounds}
+                numberOfRounds={numberOfRounds}
+                setNumberOfRounds={setNumberOfRounds}
+            />
 
             <div className="logs mt-5" id="logs">
                 <FormControl

@@ -63,7 +63,8 @@ body {
   height: 7rem;
   width: 7rem;
   left: 50%;
-  transform: translateX(-50%); }
+  transform: translateX(-50%);
+  bottom: 15%; }
 
 .baseTimer .baseTimerSVG {
   transform: scaleX(-1); }
@@ -97,6 +98,14 @@ body {
   justify-content: center;
   /* Sort of an arbitrary number; adjust to your liking */
   font-size: 2rem; }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0; }
+  to {
+    opacity: 100; } }
+mber; adjust to your liking */
+    font-size: 2rem; }
 
 @keyframes fadeIn {
   from {

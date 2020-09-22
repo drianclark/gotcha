@@ -3,7 +3,8 @@ import { socket } from '../socket';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Button from 'react-bootstrap/Button';
-import {GamePhase} from '../interfaces/interfaces'
+import { GamePhase } from '../interfaces/interfaces';
+import Timer from './Timer';
 
 function AnswerPhase(props: any) {
     var [choicesList, setChoicesList] = useState([]);
@@ -16,9 +17,12 @@ function AnswerPhase(props: any) {
             props.username,
             (e.target as HTMLInputElement).value
         );
+
+        console.log("answer submitted on time");
     }
 
     useEffect(() => {
+
         setChoicesList(
             props.choices.map((choice: string) => (
                 <Row key={choice} className="justify-content-center mb-2">
@@ -34,16 +38,28 @@ function AnswerPhase(props: any) {
             ))
         );
 
-        socket.on('answerReceived', () => {
+        socket.once('answerReceived', () => {
             props.setGamePhase(GamePhase.Wait);
-        })
+        });
+
+        socket.once('timeUp', () => {
+            socket.emit('answerSubmitted', props.username, `${props.username}NoAnswer`);
+        });
+
+        // timeUp is shared between QuestionPhase and AnswerPhase
+        // so we have to stop listening the timeUp event 
+        // after each Question and Answer gamephases
+        return function cleanup() {
+            socket.off('timeUp');
+        }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
         <Container className="choicesContainer h-100 d-flex flex-column justify-content-center">
-            {choicesList}
+            <Timer />
+            <div>{choicesList}</div>
         </Container>
     );
 }
