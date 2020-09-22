@@ -2,8 +2,6 @@ import socketIOClient from "socket.io-client";
 
 declare var filterXSS: any;
 
-const serverURL = process.env.SERVER_URL || 'http://localhost:5000'
-
-console.log(process.env);
+const serverURL = window.location.protocol + '//' + window.location.hostname + ':5000';
 
 export const socket = socketIOClient(serverURL);
