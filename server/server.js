@@ -63,12 +63,10 @@ var Timer = /** @class */ (function () {
         this.t = setInterval(function () {
             _this.timeLeft -= 1;
             if (_this.timeLeft === 0) {
-                // console.log(waitingFor);
                 for (var _i = 0, waitingFor_1 = waitingFor; _i < waitingFor_1.length; _i++) {
                     var p = waitingFor_1[_i];
                     var playerSocketID = players[p].socketID;
                     io.to(playerSocketID).emit('timeUp');
-                    console.log("emitted timeup to " + p);
                 }
                 clearInterval(_this.t);
             }
@@ -115,7 +113,6 @@ io.on('connection', function (socket) {
         }
     });
     socket.on('disconnect', function () {
-        console.log('disconnect');
         for (var _i = 0, _a = Object.entries(players); _i < _a.length; _i++) {
             var _b = _a[_i], player = _b[0], playerDetails = _b[1];
             if (playerDetails.socketID == socket.id) {
@@ -165,7 +162,6 @@ io.on('connection', function (socket) {
     }); });
     socket.on('questionChoiceSubmitted', function (username, choice) {
         // handle duplicate choice
-        console.log('questionChoiceSubmitted');
         if (Object.values(playerGivenChoices).includes(choice) ||
             choice == answer) {
             io.to(socket.id).emit('givenChoiceError', "duplicate choice: " + choice);
@@ -193,7 +189,6 @@ io.on('connection', function (socket) {
     });
     socket.on('skipVoteSubmitted', function (username) {
         skipVotes.add(username);
-        console.log(username + ' voted to skip');
         io.to('gameRoom').emit('skipVoteReceived', username);
         // check all players voted to skip
         if (allPlayersVotedToSkip()) {
@@ -203,14 +198,11 @@ io.on('connection', function (socket) {
         }
     });
     socket.on('answerSubmitted', function (username, userAnswer) {
-        console.log("got " + userAnswer + " from " + username);
         // if player answered in time
         if (userAnswer in playerAnswers) {
             playerAnswers[userAnswer].push(username);
         }
         removeFromWaitingFor(username);
-        // console.log(`removed ${username} from waitingFor`);
-        // console.log(waitingFor);
         io.to(socket.id).emit('answerReceived');
         io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
         if (waitingFor.length === 0) {
@@ -294,13 +286,10 @@ function removeFromPlayerQueue(id) {
     }
 }
 function removeFromWaitingFor(username) {
-    console.log('called removeFromWaitingFor on ' + username);
-    console.log(waitingFor);
     var index = waitingFor.indexOf(username);
     if (index > -1) {
         waitingFor.splice(index, 1);
     }
-    console.log(waitingFor);
 }
 function removeFromArray(a, e) {
     var index = a.indexOf(e);

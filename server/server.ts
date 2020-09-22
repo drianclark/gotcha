@@ -51,11 +51,9 @@ class Timer {
             this.timeLeft -= 1;
 
             if (this.timeLeft === 0) {
-                // console.log(waitingFor);
                 for (let p of waitingFor) {
                     let playerSocketID = players[p].socketID;
                     io.to(playerSocketID).emit('timeUp');
-                    console.log("emitted timeup to " + p);
                 }
                 clearInterval(this.t);
             } else io.to('gameRoom').emit('timerUpdate', this.timeLeft);
@@ -110,7 +108,6 @@ io.on('connection', function (socket: SocketIO.Socket) {
     });
 
     socket.on('disconnect', () => {
-        console.log('disconnect')
         for (const [player, playerDetails] of Object.entries(players)) {
             if (playerDetails.socketID == socket.id) {
                 var userQuit = player;
@@ -159,7 +156,6 @@ io.on('connection', function (socket: SocketIO.Socket) {
 
     socket.on('questionChoiceSubmitted', (username: string, choice: string) => {
         // handle duplicate choice
-        console.log('questionChoiceSubmitted')
         if (
             Object.values(playerGivenChoices).includes(choice) ||
             choice == answer
@@ -204,7 +200,6 @@ io.on('connection', function (socket: SocketIO.Socket) {
 
     socket.on('skipVoteSubmitted', (username: string) => {
         skipVotes.add(username);
-        console.log(username + ' voted to skip');
 
         io.to('gameRoom').emit('skipVoteReceived', username);
 
@@ -218,14 +213,11 @@ io.on('connection', function (socket: SocketIO.Socket) {
     });
 
     socket.on('answerSubmitted', (username: string, userAnswer: string) => {
-        console.log(`got ${userAnswer} from ${username}`)
         // if player answered in time
         if (userAnswer in playerAnswers) {
             playerAnswers[userAnswer].push(username);
         }
         removeFromWaitingFor(username);
-        // console.log(`removed ${username} from waitingFor`);
-        // console.log(waitingFor);
 
         io.to(socket.id).emit('answerReceived');
         io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
@@ -318,13 +310,10 @@ function removeFromPlayerQueue(id: socketID) {
 }
 
 function removeFromWaitingFor(username: string) {
-    console.log('called removeFromWaitingFor on ' + username)
-    console.log(waitingFor)
     const index = waitingFor.indexOf(username);
     if (index > -1) {
         waitingFor.splice(index, 1);
     }
-    console.log(waitingFor)
 
 }
 
