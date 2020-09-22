@@ -20,6 +20,7 @@ const PORT = process.env.PORT || 5000;
 app.set('port', PORT);
 
 app.use(express.static(path.resolve(__dirname, '../react-ui/build')));
+
 app.get("/", (req, res) => {
     res.sendFile(path.resolve(__dirname, "../react-ui/build/index.html"));
     });
@@ -294,7 +295,7 @@ io.on('connection', function (socket: SocketIO.Socket) {
 
 async function fetchQuestions() {
     let db = await sqlite.open({
-        filename: '../db/gotcha.db',
+        filename: './db/gotcha.db',
         driver: sqlite3.Database,
     });
 
