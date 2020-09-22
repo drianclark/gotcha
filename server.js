@@ -47,9 +47,9 @@ var sqlite3 = require('sqlite3').verbose();
 var sqlite = require('sqlite');
 var PORT = process.env.PORT || 5000;
 app.set('port', PORT);
-app.use(express.static(path.resolve(__dirname, '../client/build')));
+app.use(express.static(path.resolve(__dirname, './client/build')));
 app.get("/", function (req, res) {
-    res.sendFile(path.resolve(__dirname, "../client/build/index.html"));
+    res.sendFile(path.resolve(__dirname, "./client/build/index.html"));
 });
 // Starts the server.
 server.listen(PORT, function () {
@@ -278,7 +278,7 @@ function fetchQuestions() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, sqlite.open({
-                        filename: '../db/gotcha.db',
+                        filename: './db/gotcha.db',
                         driver: sqlite3.Database
                     })];
                 case 1:
