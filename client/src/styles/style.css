@@ -1,5 +1,7 @@
 body {
-  font-family: "Oswald", sans-serif; }
+  font-family: "Oswald", sans-serif;
+  background-color: #1d1d1d;
+  color: white; }
 
 .rootContainer {
   height: 100vh; }
@@ -98,14 +100,6 @@ body {
   justify-content: center;
   /* Sort of an arbitrary number; adjust to your liking */
   font-size: 2rem; }
-
-@keyframes fadeIn {
-  from {
-    opacity: 0; }
-  to {
-    opacity: 100; } }
-mber; adjust to your liking */
-    font-size: 2rem; }
 
 @keyframes fadeIn {
   from {
