@@ -3,6 +3,8 @@ import { socket } from '../socket';
 import Button from 'react-bootstrap/Button';
 import FormControl from 'react-bootstrap/Form';
 import Form from 'react-bootstrap/Form';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCheckCircle, faCircleNotch } from '@fortawesome/free-solid-svg-icons'
 import Timer from './Timer'
 import {GamePhase} from '../interfaces/interfaces'
 
@@ -114,11 +116,12 @@ function QuestionPhase(props: IQuestionPhaseProps) {
                     >{skipVoteReceived ? '' : 'Skip Question'}
 
                     {skipVoteLoading === true &&
-                        <i className="skipQuestionSpinner fas fa-circle-notch fa-spin"></i>
+                        <FontAwesomeIcon icon={faCircleNotch} spin/>
                     }
 
                     {skipVoteReceived === true &&
-                        <i className="skipQuestionCheck far fa-check-circle"></i>    
+                        <FontAwesomeIcon icon={faCheckCircle}/>
+
                     }
                 </Button>
 
