@@ -37,7 +37,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var express = require('express');
-var request = require('node-fetch');
 var http = require('http');
 var path = require('path');
 var socketIO = require('socket.io');
@@ -46,14 +45,9 @@ var server = http.Server(app);
 var io = socketIO(server);
 var sqlite3 = require('sqlite3').verbose();
 var sqlite = require('sqlite');
-var questions = [];
 var PORT = process.env.PORT || 5000;
 app.set('port', PORT);
 app.use('/static', express.static(__dirname + '/static'));
-// Routing
-app.get('/', function (request, response) {
-    response.sendFile(path.join(__dirname, 'index.html'));
-});
 // Starts the server.
 server.listen(PORT, function () {
     console.log("Starting server on port " + PORT);
@@ -69,10 +63,12 @@ var Timer = /** @class */ (function () {
         this.t = setInterval(function () {
             _this.timeLeft -= 1;
             if (_this.timeLeft === 0) {
+                // console.log(waitingFor);
                 for (var _i = 0, waitingFor_1 = waitingFor; _i < waitingFor_1.length; _i++) {
                     var p = waitingFor_1[_i];
                     var playerSocketID = players[p].socketID;
                     io.to(playerSocketID).emit('timeUp');
+                    console.log("emitted timeup to " + p);
                 }
                 clearInterval(_this.t);
             }
@@ -86,7 +82,7 @@ var Timer = /** @class */ (function () {
     };
     return Timer;
 }());
-var askedQuestions = {};
+var questions = [];
 var players = {};
 var playerQueue = [];
 var waitingFor = [];
@@ -98,12 +94,9 @@ var playerAnswers = {};
 var skipVotes = new Set();
 var gameInProgress = false;
 var timer = new Timer(60);
-// Add the WebSocket handlers
 io.on('connection', function (socket) {
     var _this = this;
-    // on join
     socket.on('join', function (username) {
-        // check if username doesn't exist yet
         if (username in players) {
             io.to(socket.id).emit('joinFail', 'Username already exists');
             return;
@@ -121,8 +114,8 @@ io.on('connection', function (socket) {
             showStartButtonToAdmin();
         }
     });
-    // on quit
     socket.on('disconnect', function () {
+        console.log('disconnect');
         for (var _i = 0, _a = Object.entries(players); _i < _a.length; _i++) {
             var _b = _a[_i], player = _b[0], playerDetails = _b[1];
             if (playerDetails.socketID == socket.id) {
@@ -153,7 +146,6 @@ io.on('connection', function (socket) {
         }
         updatePlayers();
     });
-    // start round
     socket.on('startRound', function () { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -171,41 +163,35 @@ io.on('connection', function (socket) {
             }
         });
     }); });
-    // after a fake answer choice has been submitted
     socket.on('questionChoiceSubmitted', function (username, choice) {
         // handle duplicate choice
-        if (Object.values(playerGivenChoices).includes(choice) || choice == answer) {
+        console.log('questionChoiceSubmitted');
+        if (Object.values(playerGivenChoices).includes(choice) ||
+            choice == answer) {
             io.to(socket.id).emit('givenChoiceError', "duplicate choice: " + choice);
             return;
         }
         io.to(socket.id).emit('givenChoiceApproved', choice);
         playerGivenChoices[username] = choice;
-        // remove player from waitingFor array
         removeFromWaitingFor(username);
         io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
         if (waitingFor.length == 0) {
             timer.stopTimer();
-            // combining player given choices with the correct answer in an array
             var choices = Object.values(playerGivenChoices);
             choices = choices.filter(function (choice) { return !choice.includes('<no answer from'); });
             choices.push(answer);
-            // adding an entry for each choice to playerAnswers
             for (var _i = 0, choices_1 = choices; _i < choices_1.length; _i++) {
                 var choice_1 = choices_1[_i];
                 playerAnswers[choice_1] = [];
             }
-            // transforming all strings to lowercase
             choices = choices.map(function (x) { return removePeriod(x.toLowerCase()); });
-            // shuffling order of choices
             shuffle(choices);
             io.to('gameRoom').emit('displayChoices', choices);
             timer.startTimer();
-            // filling waitingFor again
             fillWaitingFor();
         }
     });
     socket.on('skipVoteSubmitted', function (username) {
-        // add user to array of skipVotes
         skipVotes.add(username);
         console.log(username + ' voted to skip');
         io.to('gameRoom').emit('skipVoteReceived', username);
@@ -214,19 +200,20 @@ io.on('connection', function (socket) {
             skipVotes.clear();
             timer.stopTimer();
             startNewRound();
-            // io.to('gameRoom').emit('initialiseRoundStart');
-            // io.to('gameRoom').emit('roundEnd');
         }
     });
-    // after an answer has been submitted
     socket.on('answerSubmitted', function (username, userAnswer) {
-        playerAnswers[userAnswer].push(username);
+        console.log("got " + userAnswer + " from " + username);
+        // if player answered in time
+        if (userAnswer in playerAnswers) {
+            playerAnswers[userAnswer].push(username);
+        }
         removeFromWaitingFor(username);
-        // updates waiting for in all clients
-        // displays waiting for
+        // console.log(`removed ${username} from waitingFor`);
+        // console.log(waitingFor);
         io.to(socket.id).emit('answerReceived');
         io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
-        if (waitingFor.length == 0) {
+        if (waitingFor.length === 0) {
             timer.stopTimer();
             // give point to players who answered correctly
             if (answer in playerAnswers) {
@@ -241,6 +228,8 @@ io.on('connection', function (socket) {
                 var _d = _c[_b], playerAnswer = _d[0], players_2 = _d[1];
                 if (playerAnswer !== answer) {
                     var submittedBy = getPlayerWhoSubmittedFakeAnswer(playerAnswer);
+                    if (submittedBy === null)
+                        continue;
                     for (var _e = 0, players_1 = players_2; _e < players_1.length; _e++) {
                         var player = players_1[_e];
                         if (player !== submittedBy)
@@ -248,7 +237,6 @@ io.on('connection', function (socket) {
                     }
                 }
             }
-            // filling waitingFor again
             fillWaitingFor();
             var wrongChoices = Object.values(playerGivenChoices)
                 .filter(function (e) { return e !== answer; })
@@ -306,10 +294,13 @@ function removeFromPlayerQueue(id) {
     }
 }
 function removeFromWaitingFor(username) {
+    console.log('called removeFromWaitingFor on ' + username);
+    console.log(waitingFor);
     var index = waitingFor.indexOf(username);
     if (index > -1) {
         waitingFor.splice(index, 1);
     }
+    console.log(waitingFor);
 }
 function removeFromArray(a, e) {
     var index = a.indexOf(e);
@@ -328,7 +319,6 @@ function startNewRound() {
             category = questionObject.category;
             playerAnswers = {};
             playerGivenChoices = {};
-            // io.to('gameRoom').emit('hideLogs');
             io.to('gameRoom').emit('initialiseRoundStart', question, category, players);
             timer.startTimer();
             return [2 /*return*/];
@@ -349,7 +339,7 @@ function logForAll(message) {
     io.to('gameRoom').emit('log', message);
 }
 function removePeriod(s) {
-    if (s[s.length - 1] === ".") {
+    if (s[s.length - 1] === '.') {
         return s.slice(0, -1);
     }
     return s;
@@ -360,7 +350,9 @@ function getPlayerWhoSubmittedFakeAnswer(answer) {
         if (answer == playerGivenChoice)
             return player;
     }
-    throw "answer is not in submitted choices";
+    // if answer is not in submitted choices,
+    // the player must have skipped
+    return null;
 }
 function givePoint(player) {
     try {
@@ -381,4 +373,3 @@ function allPlayersVotedToSkip() {
     }
     return true;
 }
-;
