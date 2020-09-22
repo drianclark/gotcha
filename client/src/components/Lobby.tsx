@@ -12,10 +12,10 @@ function Lobby(props: any) {
     var [readyToStart, setReadyToStart] = useState(
         Object.keys(props.players).length > 1
     );
-    var [playersList, setPlayersList]:any = useState();
+    var [playersList, setPlayersList]: any = useState();
     var [logs, setLogs] = useState('');
     var [isAdmin, setIsAdmin] = useState(false);
-    var [numberOfRounds, setNumberOfRounds] = useState(1);
+    var [numberOfRounds, setNumberOfRounds] = useState(10);
 
     useEffect(() => {
         socket.on('updatePlayers', (players: IPlayers) => {
@@ -68,11 +68,13 @@ function Lobby(props: any) {
                 </Button>
             )}
 
-            <GameOptions
-                key={numberOfRounds}
-                numberOfRounds={numberOfRounds}
-                setNumberOfRounds={setNumberOfRounds}
-            />
+            {isAdmin && (
+                <GameOptions
+                    key={numberOfRounds}
+                    numberOfRounds={numberOfRounds}
+                    setNumberOfRounds={setNumberOfRounds}
+                />
+            )}
 
             <div className="logs mt-5" id="logs">
                 <FormControl

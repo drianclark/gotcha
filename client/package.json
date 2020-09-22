@@ -11,6 +11,7 @@
     "@types/react": "^16.9.49",
     "@types/react-dom": "^16.9.8",
     "bootstrap": "^4.5.2",
+    "node-sass": "^4.14.1",
     "react": "^16.13.1",
     "react-bootstrap": "^1.3.0",
     "react-dom": "^16.13.1",
@@ -19,7 +20,7 @@
     "typescript": "^3.7.5"
   },
   "scripts": {
-    "start": "concurrently \"BROWSER=none react-scripts start\" \"npx node-sass --watch -q src/styles -o src/styles\"",
+    "start": "concurrently \"BROWSER=none react-scripts start\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

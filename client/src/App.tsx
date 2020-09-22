@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { socket } from './socket';
-import './styles/style.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import './styles/style.css';
 import Login from './components/Login';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
