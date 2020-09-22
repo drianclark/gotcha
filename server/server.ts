@@ -20,7 +20,6 @@ const PORT = process.env.PORT || 5000;
 app.set('port', PORT);
 app.use('/static', express.static(__dirname + '/static'));
 
-
 // Starts the server.
 server.listen(PORT, function () {
     console.log(`Starting server on port ${PORT}`);
@@ -66,6 +65,8 @@ class Timer {
     }
 }
 
+var numberOfRounds: number = 10;
+var currentRound = 0;
 var questions: IQuestionObject[] = [];
 var players: IPlayers = {};
 var playerQueue: socketID[] = [];
@@ -82,7 +83,6 @@ const timer = new Timer(60);
 
 io.on('connection', function (socket: SocketIO.Socket) {
     socket.on('join', (username: string) => {
-
         if (username in players) {
             io.to(socket.id).emit('joinFail', 'Username already exists');
             return;
@@ -142,12 +142,19 @@ io.on('connection', function (socket: SocketIO.Socket) {
         updatePlayers();
     });
 
+    socket.on('startGame', async (submittedNumberOfRounds: number) => {
+        numberOfRounds = submittedNumberOfRounds;
+        currentRound = 0;
+        gameInProgress = true;
+        await fetchQuestions();
+        fillWaitingFor();
+        startNewRound();
+    });
+
     socket.on('startRound', async () => {
         if (questions.length == 0) {
             await fetchQuestions();
         }
-
-        gameInProgress = true;
 
         fillWaitingFor();
         startNewRound();
@@ -208,7 +215,6 @@ io.on('connection', function (socket: SocketIO.Socket) {
             skipVotes.clear();
             timer.stopTimer();
             startNewRound();
-
         }
     });
 
@@ -242,7 +248,7 @@ io.on('connection', function (socket: SocketIO.Socket) {
                         playerAnswer
                     );
                     if (submittedBy === null) continue;
-                    
+
                     for (const player of players) {
                         if (player !== submittedBy) givePoint(submittedBy);
                     }
@@ -271,8 +277,13 @@ io.on('connection', function (socket: SocketIO.Socket) {
         removeFromWaitingFor(username);
 
         if (waitingFor.length === 0) {
-            fillWaitingFor();
-            startNewRound();
+            console.log('next round is ' + (currentRound + 1));
+            if (currentRound === numberOfRounds) {
+                endGame();
+            } else {
+                fillWaitingFor();
+                startNewRound();
+            }
         }
     });
 });
@@ -314,7 +325,6 @@ function removeFromWaitingFor(username: string) {
     if (index > -1) {
         waitingFor.splice(index, 1);
     }
-
 }
 
 function removeFromArray(a: any[], e: any) {
@@ -325,6 +335,8 @@ function removeFromArray(a: any[], e: any) {
 }
 
 async function startNewRound() {
+    currentRound += 1;
+    console.log('starting round ' + currentRound)
     questions.shift();
     let questionObject = questions[0];
     question = removePeriod(questionObject.question);
@@ -336,6 +348,23 @@ async function startNewRound() {
 
     io.to('gameRoom').emit('initialiseRoundStart', question, category, players);
     timer.startTimer();
+}
+
+function endGame() {
+    let maxScore = -1;
+
+    // getting the max score
+    for (const playerDetails of Object.values(players)) {
+        if (playerDetails.score > maxScore) maxScore = playerDetails.score;
+    }
+
+    let winners = 
+            Object.keys(players).filter((player) => {
+                return players[player].score === maxScore;
+            });
+
+    io.to('gameRoom').emit('endGame', winners, players)
+    console.log('emitted endGame')
 }
 
 function shuffle(a: any[]) {
