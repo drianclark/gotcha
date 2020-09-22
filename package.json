@@ -4,10 +4,10 @@
   "description": "psych but in the browser",
   "main": "server.js",
   "scripts": {
-    "start": "node server",
-    "dev": "concurrently \"nodemon server.js\" \"npx tsc\"",
+    "start": "node server/server.js",
+    "dev": "concurrently \"nodemon server/server.js\" \"npx tsc\"",
     "test": "jest",
-    "build": "cd react-ui && npm install && npm run build"
+    "build": "cd react-ui && npmnpm run build"
   },
   "author": "Adrian David",
   "license": "MIT",
