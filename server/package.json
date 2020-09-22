@@ -4,7 +4,7 @@
   "description": "psych but in the browser",
   "main": "server.js",
   "scripts": {
-    "dev": "concurrently \"nodemon server.js\" \"npx node-sass --watch -q static -o static\" \"npx tsc\"",
+    "dev": "concurrently \"nodemon server.js\" \"npx tsc\"",
     "test": "jest"
   },
   "author": "Adrian David",
@@ -18,7 +18,7 @@
     "sqlite3": "^5.0.0"
   },
   "devDependencies": {
-    "@types/node": "^14.6.4",
+    "@types/node": "^14.11.1",
     "@types/socket.io": "^2.1.11",
     "concurrently": "^5.3.0",
     "expect-puppeteer": "^4.4.0",

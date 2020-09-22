@@ -37,7 +37,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var express = require('express');
-var request = require('node-fetch');
 var http = require('http');
 var path = require('path');
 var socketIO = require('socket.io');
@@ -46,13 +45,11 @@ var server = http.Server(app);
 var io = socketIO(server);
 var sqlite3 = require('sqlite3').verbose();
 var sqlite = require('sqlite');
-var questions = [];
 var PORT = process.env.PORT || 5000;
 app.set('port', PORT);
-app.use('/static', express.static(__dirname + '/static'));
-// Routing
-app.get('/', function (request, response) {
-    response.sendFile(path.join(__dirname, 'index.html'));
+app.use(express.static(path.resolve(__dirname, '../client/build')));
+app.get("/", function (req, res) {
+    res.sendFile(path.resolve(__dirname, "../client/build/index.html"));
 });
 // Starts the server.
 server.listen(PORT, function () {
@@ -86,7 +83,9 @@ var Timer = /** @class */ (function () {
     };
     return Timer;
 }());
-var askedQuestions = {};
+var numberOfRounds = 10;
+var currentRound = 0;
+var questions = [];
 var players = {};
 var playerQueue = [];
 var waitingFor = [];
@@ -98,18 +97,14 @@ var playerAnswers = {};
 var skipVotes = new Set();
 var gameInProgress = false;
 var timer = new Timer(60);
-// Add the WebSocket handlers
 io.on('connection', function (socket) {
     var _this = this;
-    // on join
     socket.on('join', function (username) {
-        // check if username doesn't exist yet
         if (username in players) {
-            console.log('error joining');
             io.to(socket.id).emit('joinFail', 'Username already exists');
             return;
         }
-        io.to(socket.id).emit('joinSuccess');
+        socket.emit('joinSuccess', username);
         socket.join('gameRoom');
         players[username] = {
             score: 0,
@@ -122,7 +117,6 @@ io.on('connection', function (socket) {
             showStartButtonToAdmin();
         }
     });
-    // on quit
     socket.on('disconnect', function () {
         for (var _i = 0, _a = Object.entries(players); _i < _a.length; _i++) {
             var _b = _a[_i], player = _b[0], playerDetails = _b[1];
@@ -145,9 +139,7 @@ io.on('connection', function (socket) {
         }
         socket.leaveAll();
         if (Object.keys(players).length < 2) {
-            if (!gameInProgress)
-                hideStartButtonToAdmin();
-            else {
+            if (gameInProgress) {
                 gameInProgress = false;
                 timer.stopTimer();
                 io.to('gameRoom').emit('insufficientPlayers');
@@ -156,7 +148,22 @@ io.on('connection', function (socket) {
         }
         updatePlayers();
     });
-    // start round
+    socket.on('startGame', function (submittedNumberOfRounds) { return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    numberOfRounds = submittedNumberOfRounds;
+                    currentRound = 0;
+                    gameInProgress = true;
+                    return [4 /*yield*/, fetchQuestions()];
+                case 1:
+                    _a.sent();
+                    fillWaitingFor();
+                    startNewRound();
+                    return [2 /*return*/];
+            }
+        });
+    }); });
     socket.on('startRound', function () { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -167,80 +174,81 @@ io.on('connection', function (socket) {
                     _a.sent();
                     _a.label = 2;
                 case 2:
-                    gameInProgress = true;
                     fillWaitingFor();
                     startNewRound();
                     return [2 /*return*/];
             }
         });
     }); });
-    // after a fake answer choice has been submitted
     socket.on('questionChoiceSubmitted', function (username, choice) {
         // handle duplicate choice
-        var playerSocketID = socket.id;
-        if (Object.values(playerGivenChoices).includes(choice) || choice == answer) {
-            io.to(playerSocketID).emit('givenChoiceError', choice);
+        if (Object.values(playerGivenChoices).includes(choice) ||
+            choice == answer) {
+            io.to(socket.id).emit('givenChoiceError', "duplicate choice: " + choice);
             return;
         }
-        io.to(playerSocketID).emit('givenChoiceApproved', choice);
+        io.to(socket.id).emit('givenChoiceApproved', choice);
         playerGivenChoices[username] = choice;
-        // remove player from waitingFor array
         removeFromWaitingFor(username);
         io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
         if (waitingFor.length == 0) {
             timer.stopTimer();
-            // combining player given choices with the correct answer in an array
             var choices = Object.values(playerGivenChoices);
             choices = choices.filter(function (choice) { return !choice.includes('<no answer from'); });
             choices.push(answer);
-            // transforming all strings to lowercase
+            for (var _i = 0, choices_1 = choices; _i < choices_1.length; _i++) {
+                var choice_1 = choices_1[_i];
+                playerAnswers[choice_1] = [];
+            }
             choices = choices.map(function (x) { return removePeriod(x.toLowerCase()); });
-            // shuffling order of choices
             shuffle(choices);
             io.to('gameRoom').emit('displayChoices', choices);
             timer.startTimer();
-            // filling waitingFor again
             fillWaitingFor();
         }
     });
     socket.on('skipVoteSubmitted', function (username) {
-        var playerSocketID = socket.id;
-        // add user to array of skipVotes
         skipVotes.add(username);
         io.to('gameRoom').emit('skipVoteReceived', username);
         // check all players voted to skip
         if (allPlayersVotedToSkip()) {
             skipVotes.clear();
             timer.stopTimer();
-            io.to('gameRoom').emit('roundEnd');
+            startNewRound();
         }
     });
-    // after an answer has been submitted
     socket.on('answerSubmitted', function (username, userAnswer) {
-        playerAnswers[username] = userAnswer;
-        var playerSocketID = socket.id;
+        // if player answered in time
+        if (userAnswer in playerAnswers) {
+            playerAnswers[userAnswer].push(username);
+        }
         removeFromWaitingFor(username);
-        // updates waiting for in all clients
+        io.to(socket.id).emit('answerReceived');
         io.to('gameRoom').emit('updatedWaitingFor', waitingFor);
-        // displays waiting for
-        io.to(playerSocketID).emit('answerReceived', waitingFor);
-        if (waitingFor.length == 0) {
+        if (waitingFor.length === 0) {
             timer.stopTimer();
-            for (var _i = 0, _a = Object.entries(playerAnswers); _i < _a.length; _i++) {
-                var _b = _a[_i], player = _b[0], playerAnswer = _b[1];
-                if (playerAnswer == answer) {
+            // give point to players who answered correctly
+            if (answer in playerAnswers) {
+                for (var _i = 0, _a = playerAnswers[answer]; _i < _a.length; _i++) {
+                    var player = _a[_i];
                     givePoint(player);
                 }
-                else {
-                    // if the player's answer is not their own submitted fake answer
-                    // give a point to the player who made up that answer
-                    if (playerAnswer != playerGivenChoices[username]) {
-                        var gotBy = getPlayerWhoSubmittedFakeAnswer(playerAnswer);
-                        givePoint(gotBy);
+            }
+            // give point to players who fooled other players
+            // based on the number of players they fooled
+            for (var _b = 0, _c = Object.entries(playerAnswers); _b < _c.length; _b++) {
+                var _d = _c[_b], playerAnswer = _d[0], players_2 = _d[1];
+                if (playerAnswer !== answer) {
+                    var submittedBy = getPlayerWhoSubmittedFakeAnswer(playerAnswer);
+                    if (submittedBy === null)
+                        continue;
+                    for (var _e = 0, players_1 = players_2; _e < players_1.length; _e++) {
+                        var player = players_1[_e];
+                        if (player !== submittedBy)
+                            givePoint(submittedBy);
                     }
                 }
             }
-            // filling waitingFor again
             fillWaitingFor();
             var wrongChoices = Object.values(playerGivenChoices)
                 .filter(function (e) { return e !== answer; })
@@ -252,32 +260,25 @@ io.on('connection', function (socket) {
     });
     socket.on('resultsShown', function (username) {
         removeFromWaitingFor(username);
-        if (waitingFor.length == 0) {
-            fillWaitingFor();
-            io.to('gameRoom').emit('updateScores', players);
-            io.to('gameRoom').emit('roundEnd', players);
-        }
-    });
-    // after clients are done cleaning up
-    socket.on('cleanupDone', function (username) {
-        removeFromWaitingFor(username);
-        if (waitingFor.length == 0) {
-            // remove the current question
-            questions.shift();
-            fillWaitingFor();
-            startNewRound();
+        if (waitingFor.length === 0) {
+            console.log('next round is ' + (currentRound + 1));
+            if (currentRound === numberOfRounds) {
+                endGame();
+            }
+            else {
+                fillWaitingFor();
+                startNewRound();
+            }
         }
     });
 });
-// io.sockets.emit sends message to all sockets;
-// socket.on only responds to the one socket that emitted something
 function fetchQuestions() {
     return __awaiter(this, void 0, void 0, function () {
         var db, query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, sqlite.open({
-                        filename: './db/gotcha.db',
+                        filename: '../db/gotcha.db',
                         driver: sqlite3.Database
                     })];
                 case 1:
@@ -293,20 +294,16 @@ function fetchQuestions() {
     });
 }
 function updatePlayers() {
-    io.to('gameRoom').emit('playersList', Object.keys(players));
+    io.to('gameRoom').emit('updatePlayers', players);
 }
 function showStartButtonToAdmin() {
     try {
         var admin = playerQueue[0];
-        io.to(admin).emit('showStartButton');
+        io.to(admin).emit('assignAdmin');
     }
     catch (e) {
         console.log(e);
     }
-}
-function hideStartButtonToAdmin() {
-    var admin = playerQueue[0];
-    io.to(admin).emit('hideStartButton');
 }
 function removeFromPlayerQueue(id) {
     var index = playerQueue.indexOf(id);
@@ -330,18 +327,34 @@ function startNewRound() {
     return __awaiter(this, void 0, void 0, function () {
         var questionObject;
         return __generator(this, function (_a) {
+            currentRound += 1;
+            console.log('starting round ' + currentRound);
+            questions.shift();
             questionObject = questions[0];
             question = removePeriod(questionObject.question);
             answer = questionObject.answer.trim().toLowerCase();
             category = questionObject.category;
             playerAnswers = {};
             playerGivenChoices = {};
-            io.to('gameRoom').emit('hideLogs');
-            io.to('gameRoom').emit('initaliseRoundStart', question, category, players);
+            io.to('gameRoom').emit('initialiseRoundStart', question, category, players);
             timer.startTimer();
             return [2 /*return*/];
         });
     });
+}
+function endGame() {
+    var maxScore = -1;
+    // getting the max score
+    for (var _i = 0, _a = Object.values(players); _i < _a.length; _i++) {
+        var playerDetails = _a[_i];
+        if (playerDetails.score > maxScore)
+            maxScore = playerDetails.score;
+    }
+    var winners = Object.keys(players).filter(function (player) {
+        return players[player].score === maxScore;
+    });
+    io.to('gameRoom').emit('endGame', winners, players);
+    console.log('emitted endGame');
 }
 function shuffle(a) {
     var j, x, i;
@@ -357,7 +370,7 @@ function logForAll(message) {
     io.to('gameRoom').emit('log', message);
 }
 function removePeriod(s) {
-    if (s[s.length - 1] === ".") {
+    if (s[s.length - 1] === '.') {
         return s.slice(0, -1);
     }
     return s;
@@ -368,7 +381,9 @@ function getPlayerWhoSubmittedFakeAnswer(answer) {
         if (answer == playerGivenChoice)
             return player;
     }
-    throw "answer is not in submitted choices";
+    // if answer is not in submitted choices,
+    // the player must have skipped
+    return null;
 }
 function givePoint(player) {
     try {
@@ -389,4 +404,3 @@ function allPlayersVotedToSkip() {
     }
     return true;
 }
-;

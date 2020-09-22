@@ -2,7 +2,10 @@ $primary-font: 'Oswald', sans-serif;
 $secondary-font: 'Raleway', sans-serif;
 
 body {
-    font-family: $primary-font;    
+    font-family: $primary-font;
+    background-color: #1d1d1d;
+    color: white;
+
 }
 
 .rootContainer {
@@ -20,7 +23,7 @@ body {
         margin-bottom: 0.2em;
     }
 
-    #usernameField {
+    .usernameField {
         text-align: center;
         max-width: 40%;
         min-width: 300px;
@@ -28,21 +31,13 @@ body {
 }
 
 .lobbyContainer {
-    display: none;
-
     ul {
         list-style-type: none;
         margin-top: 2em;
         padding-left: 0.5em;
     }
 
-    & > .startGameButton {
-        display: none;
-    }
-
     .logs {
-        display: none;
-
         > .logsBox {
             width: 100%;
         }
@@ -50,43 +45,24 @@ body {
 }
 
 .questionContainer {
-    display: none;
-
     .madeUpChoiceForm {
+        display: flex;
         textarea {
+            min-width: 100%;
             max-width: 700px;
         }
     }
 
-
     .skipQuestionRow {
         .skipQuestionButton {
             white-space: normal;
-
-            .skipQuestionSpinner {
-                display: none;
-            }
-
-            .skipQuestionCheck {
-                display: none;
-            }
-        }
-        
-        .timerText {
-            display: none;
         }
     }
 }
 
 .choicesContainer {
-    display: none;
-
     .choiceButton {
         min-width: 30%;
-    }
-
-    .answerTimerText {
-        display: none;
     }
 }
 
@@ -96,8 +72,6 @@ body {
 }
 
 .resultsContainer {
-    display: none;
-    
     .choiceRow {
         animation-name: fadeIn;
         animation-duration: 1s;
@@ -115,16 +89,58 @@ body {
             min-width: 30%;
         }
     }
+}
 
-    .roundScores {
-        display: none;
+.baseTimer {
+    position: relative;
+    height: 7rem;
+    width: 7rem;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 15%;
+
+    & .baseTimerSVG {
+        transform: scaleX(-1);
+
+        & .baseTimerCircle {
+            fill: none;
+            stroke: none;
+
+            & .baseTimerPathElapsed {
+                stroke-width: 6px;
+                stroke: #4e4e4e;
+            }
+
+            & .baseTimerPathRemaining {
+                stroke: dodgerblue;
+                stroke-width: 6px;
+                stroke-linecap: round;
+                transition: 1s linear all;
+                transform: rotate(90deg);
+                transform-origin: center;
+            }
+        }
+    }
+
+    .baseTimerLabel {
+        position: absolute;
+
+        /* Size should match the parent container */
+        width: 7rem;
+        height: 7rem;
+
+        /* Keep the label aligned to the top */
+        top: 0;
+
+        /* Create a flexible box that centers content vertically and horizontally */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        /* Sort of an arbitrary number; adjust to your liking */
+        font-size: 2rem;
     }
 }
-
-.bottomContainer {
-    display: none;
-}
-
 
 @keyframes fadeIn {
     from {
