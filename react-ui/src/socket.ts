@@ -1,4 +1,7 @@
 import socketIOClient from "socket.io-client";
-import config from './config'
 
-export const socket = socketIOClient(config.serverURL);
+declare var filterXSS: any;
+
+const serverURL = process.env.SERVER_URL ? process.env.SERVER_URL : 'http://localhost:5000'
+
+export const socket = socketIOClient(serverURL);
