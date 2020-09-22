@@ -17,7 +17,6 @@ const sqlite3 = require('sqlite3').verbose();
 const sqlite = require('sqlite');
 
 const PORT = process.env.PORT || 5000;
-app.set('port', PORT);
 
 app.use(express.static(path.resolve(__dirname, '../react-ui/build')));
 
