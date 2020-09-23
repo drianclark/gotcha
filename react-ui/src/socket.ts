@@ -1,15 +1,10 @@
-import socketIOClient from "socket.io-client";
+import socketIOClient from 'socket.io-client';
 
 declare var filterXSS: any;
-var serverURL;
 
-if (process.env.NODE_ENV === 'development') {
-    serverURL = window.location.protocol + '//' + window.location.hostname + ':5000';
-}
-else {
-    serverURL = window.location.origin;
-}
-
-console.log(serverURL)
+const serverURL =
+    process.env.NODE_ENV === 'development'
+        ? window.location.protocol + '//' + window.location.hostname + ':5000'
+        : window.location.origin;
 
 export const socket = socketIOClient(serverURL);
