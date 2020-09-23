@@ -17,10 +17,10 @@ function ScoreCard(props: IScoreCardProps) {
 
     return (
         <Card
-            className="scoreBoard text-center"
+            className="scoreBoard text-center mt-md-0 mt-4"
         >
             <Card.Body className="py-2">
-                <Card.Title className="mb-3">Scores</Card.Title>
+                <Card.Title className="mb-md-3 mb-1 text-dark">Scores</Card.Title>
                 <ListGroup
                     variant="flush"
                     className="scoresList list-unstyled"

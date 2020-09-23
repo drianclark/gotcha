@@ -13,11 +13,11 @@ function ResultRow(props: IResultRowProps) {
 
     return (
         <div>
-            <Row className="choiceRow align-items-center mb-2">
-                <Col sm={6} className="playerAnswersCol">
+            <Row className="choiceRow align-items-center mb-3 mb-md-2">
+                <Col xs={6} className="playerAnswersCol">
                     <p>{props.players.join(', ')}</p>
                 </Col>
-                <Col sm={6} className="choiceCard">
+                <Col xs={6} className="choiceCard">
                     <Button variant={props.correct ? "outline-success" : "outline-danger"} disabled>
                         {props.choice}
                     </Button>

@@ -1,33 +1,13 @@
-$primary-font: 'Oswald', sans-serif;
-$secondary-font: 'Raleway', sans-serif;
+@import 'variables.scss';
 
 body {
     font-family: $primary-font;
     background-color: #1d1d1d;
     color: white;
-
 }
 
 .rootContainer {
     height: 100vh;
-}
-
-.usernameForm {
-    height: 100vh;
-    margin-top: -5em;
-
-    h1 {
-        font-family: $primary-font;
-        color: dodgerblue;
-        font-size: 10em;
-        margin-bottom: 0.2em;
-    }
-
-    .usernameField {
-        text-align: center;
-        max-width: 40%;
-        min-width: 300px;
-    }
 }
 
 .lobbyContainer {
@@ -44,51 +24,9 @@ body {
     }
 }
 
-.questionContainer {
-    .madeUpChoiceForm {
-        display: flex;
-        textarea {
-            min-width: 100%;
-            max-width: 700px;
-        }
-    }
-
-    .skipQuestionRow {
-        .skipQuestionButton {
-            white-space: normal;
-        }
-    }
-}
-
-.choicesContainer {
-    .choiceButton {
-        min-width: 30%;
-    }
-}
-
 .waitingForContainer {
     display: none !important;
     height: 100vh;
-}
-
-.resultsContainer {
-    .choiceRow {
-        animation-name: fadeIn;
-        animation-duration: 1s;
-        animation-timing-function: ease-in-out;
-
-        & > .playerAnswersCol {
-            text-align: right;
-
-            & > p {
-                margin-bottom: 0;
-            }
-        }
-
-        .choiceCard > button {
-            min-width: 30%;
-        }
-    }
 }
 
 .baseTimer {

@@ -3,6 +3,7 @@ import {socket} from '../socket'
 import Container from 'react-bootstrap/Container';
 import ResultRow from './ResultRow';
 import { IPlayerAnswers } from '../interfaces/interfaces';
+import '../styles/Results.scss'
 
 interface IResultsProps {
     wrongChoices: string[];
@@ -56,7 +57,7 @@ function Results(props: IResultsProps) {
     return (
         <Container className="resultsContainer pt-5">
             <h2>Results</h2>
-            <div className="results mt-5">
+            <div className="results mt-5 pt-5 pt-md-0">
                 <ResultRow
                     key={props.answer}
                     players={correctPlayers}

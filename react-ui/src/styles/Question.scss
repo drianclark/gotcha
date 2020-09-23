@@ -1,0 +1,23 @@
+@import 'variables.scss';
+
+.questionContainer {
+    .madeUpChoiceForm {
+        display: flex;
+        textarea {
+            min-width: 100%;
+            max-width: 700px;
+        }
+    }
+
+    .skipQuestionRow {
+        .skipQuestionButton {
+            white-space: normal;
+        }
+    }
+
+    @media only screen and (max-width: $tabletsAndSmaller){
+        .skipQuestionRow {
+            min-height: 15vh;
+        }
+    }
+}

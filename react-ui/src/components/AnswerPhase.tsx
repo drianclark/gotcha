@@ -5,6 +5,7 @@ import Row from 'react-bootstrap/Row';
 import Button from 'react-bootstrap/Button';
 import { GamePhase } from '../interfaces/interfaces';
 import Timer from './Timer';
+import '../styles/AnswerPhase.scss'
 
 function AnswerPhase(props: any) {
     var [choicesList, setChoicesList] = useState([]);

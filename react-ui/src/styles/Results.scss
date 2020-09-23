@@ -1,0 +1,23 @@
+@import 'variables.scss';
+
+.resultsContainer {
+    .choiceRow {
+        animation-name: fadeIn;
+        animation-duration: 1s;
+        animation-timing-function: ease-in-out;
+        font-size: clamp(1.5em, 3vw, 2em);
+
+        & > .playerAnswersCol {
+            text-align: right;
+
+            & > p {
+                margin-bottom: 0;
+            }
+        }
+
+        .choiceCard > button {
+            min-width: clamp(25vw, 30%, 30vw);
+            font-size: clamp(1em, 3vw, 1.5em);
+        }
+    }
+}

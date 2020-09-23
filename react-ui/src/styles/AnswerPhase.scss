@@ -1,0 +1,8 @@
+@import 'variables.scss';
+
+.choicesContainer {
+    .choiceButton {
+        min-width: clamp(30vh, 30%, 35vh);
+        font-size: clamp(1.5em, 5vh, 2em);
+    }
+}

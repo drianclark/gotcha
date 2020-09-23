@@ -4,6 +4,7 @@ import FormControl from 'react-bootstrap/FormControl';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import {GamePhase} from '../interfaces/interfaces'
+import '../styles/Login.scss';
 
 declare var filterXSS: any;
 
@@ -51,7 +52,7 @@ function Login(props: any) {
                     <Button
                         type="button"
                         variant="primary"
-                        className="mt-2"
+                        className="mt-md-2 mt-3"
                         onClick={submitUsername}
                     >
                         Join Game!

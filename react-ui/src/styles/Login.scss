@@ -1,0 +1,33 @@
+@import 'variables.scss';
+
+.usernameForm {
+    height: 100vh;
+    margin-top: -5em;
+
+    h1 {
+        font-family: $primary-font;
+        color: dodgerblue;
+        font-size: clamp(5em, 10em, 20vw);
+        margin-bottom: 0.2em;
+    }
+
+    .usernameField {
+        text-align: center;
+        max-width: 40%;
+        min-width: 300px;
+    }
+
+    @media only screen and (max-width: $tabletsAndSmaller){
+        .usernameField {
+            height: 6vh;
+            font-size: 3vh;
+        }
+        
+        button {
+            width: clamp(6em, 40vw, 8em);
+            font-size: clamp(1em, 3.5vw, 1.3em);
+        }
+    }
+
+    
+}

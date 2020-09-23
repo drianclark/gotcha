@@ -51,7 +51,7 @@ function Lobby(props: any) {
     }
 
     return (
-        <Container className="lobbyContainer mt-5" id="lobbyContainer">
+        <Container className="lobbyContainer mt-5 mx-md-2" id="lobbyContainer">
             <h2>Players</h2>
             <ul id="lobbyPlayersList" className="lobbyPlayersList">
                 {playersList}

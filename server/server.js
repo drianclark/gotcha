@@ -46,7 +46,6 @@ var io = socketIO(server);
 var sqlite3 = require('sqlite3').verbose();
 var sqlite = require('sqlite');
 var PORT = process.env.PORT || 5000;
-app.set('port', PORT);
 app.use(express.static(path.resolve(__dirname, '../react-ui/build')));
 app.get("/", function (req, res) {
     res.sendFile(path.resolve(__dirname, "../react-ui/build/index.html"));
